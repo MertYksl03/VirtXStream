@@ -1,0 +1,18 @@
+Section "Monitor"
+    Identifier     "Monitor0"
+    VendorName     "Unknown"
+    ModelName      "Unknown"
+    Option         "DPMS"
+EndSection
+
+Section "Screen"
+    Identifier     "Screen0"
+    Device         "nvidia"
+    Monitor        "Monitor0"
+    DefaultDepth    24
+    Option         "ConnectedMonitor" "*****"
+    Option         "ModeValidation" "NoDFPNativeResolutionCheck,NoVirtualSizeCheck,NoMaxPClkCheck,NoHorizSyncCheck,NoVertRefreshCheck,NoWidthAlignmentCheck"
+    SubSection     "Display"
+        Depth       24
+    EndSubSection
+EndSection
