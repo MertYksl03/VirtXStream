@@ -19,7 +19,7 @@ class Dummy:
         self.__file_path = file_path
         self.__ports = self.get_ports()
 
-        # TODO: I don't know what to do when the pprt is not valid
+        # TODO: I don't know what to do when the port is not valid
         # if not self.check_port_is_valid(self.__ports, self.__port_name):
             # sys.exit(2)
             

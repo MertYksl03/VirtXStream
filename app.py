@@ -15,7 +15,7 @@ import json
 class MyApp(Gtk.Application):
 
     def __init__(self):
-        super().__init__(application_id="com.example.myapp")  # Add an application ID
+        super().__init__(application_id="org.gnome.X-Vnc")  # Add an application ID
         self.loading_window = None
         self.main_window = None
 
