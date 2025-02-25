@@ -6,8 +6,8 @@ class FileManager:
         try:
             with open(file_path, "r") as file:
                 return file.read()
-        except Exception as e:
-            return e
+        except Exception:
+            return False
         
     def write_file(file_path, data):
         try:
