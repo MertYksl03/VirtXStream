@@ -27,3 +27,4 @@ class LoadingWindow(Gtk.Window):
         self.spinner.start()
 
         self.add(box)
+    

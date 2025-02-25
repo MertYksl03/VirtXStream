@@ -1,0 +1,11 @@
+{
+    "x" : {
+        "file_path": "testfiles/",
+        "default_port": "HDMI-1-0"
+    },
+
+    "Vnc" : {
+        "default_port": "5900"
+    }
+
+}

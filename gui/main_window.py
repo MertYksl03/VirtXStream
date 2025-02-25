@@ -40,33 +40,20 @@ class MainWindow(Gtk.ApplicationWindow):
 
     def on_click_activate(self, button):
         # status = Dummy.activate_dummy_config()
-        self.show_error("asd")
+        self.show_error_dialog("asdsda")
 
     def on_click_deactivate(self, button):
-        status = Dummy.deactive_dummy_config()
+        print()
       
-    def show_error(self, error):
+    def show_error_dialog(self, message):
         dialog = Gtk.MessageDialog(
-            parent=None,
+            transient_for=self,
             flags=0,
             message_type=Gtk.MessageType.ERROR,
             buttons=Gtk.ButtonsType.OK,
+            text=message,
         )
-
-        dialog.set_text = "Error"
-        dialog.format_secondary_text(str(error))
         dialog.run()
         dialog.destroy()
-
-    def show_succes(self, error):
-        dialog = Gtk.MessageDialog(
-            parent=None,
-            flags=0,
-            message_type=Gtk.MessageType.INFO,
-            buttons=Gtk.ButtonsType.OK,
-            text="Error",
-        )
-        dialog.format_secondary_text(str(error))
-        dialog.run()
-        dialog.destroy()
+    
         
