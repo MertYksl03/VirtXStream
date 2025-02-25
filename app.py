@@ -3,7 +3,6 @@ gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, GLib  # type: ignore
 
 from gui.main_window import MainWindow
-from gui.loading_window import LoadingWindow
 
 from src.dummy import Dummy
 
@@ -16,14 +15,12 @@ class MyApp(Gtk.Application):
 
     def __init__(self):
         super().__init__(application_id="org.gnome.X-Vnc")  # Add an application ID
-        self.loading_window = None
         self.main_window = None
 
     def do_activate(self):
-        # Show the loading screen
-        self.loading_window = LoadingWindow()
-        self.add_window(self.loading_window)
-        self.loading_window.show_all()
+        self.main_window = MainWindow(application=self)
+        self.add_window(self.main_window)
+        self.main_window.show_all()
 
         # Initialization in a separate thread
         threading.Thread(target=self.initialize_app, daemon=True).start()
@@ -44,22 +41,7 @@ class MyApp(Gtk.Application):
 
         # Load additional data
         # self.load_data()
-    
-
-        # Show the main window after initialization
-        GLib.idle_add(self.show_main_window)
-
-    def show_main_window(self):
-        # Close the loading screen
-        if self.loading_window:
-            self.loading_window.destroy()
-            self.loading_window = None  # Remove reference
-
-        # Now show the main window
-        self.main_window = MainWindow(application=self)
-        self.add_window(self.main_window)
-        self.main_window.show_all()
-
+        GLib.idle_add(self.main_window.show_error_dialog, "Loadded data")
 
     def load_data(self):
         # TODO: Load data from json file
