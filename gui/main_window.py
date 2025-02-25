@@ -40,7 +40,7 @@ class MainWindow(Gtk.ApplicationWindow):
 
     def on_click_activate(self, button):
         # status = Dummy.activate_dummy_config()
-        self.show_error_dialog("asdsda")
+        self.show_error_dialog("asd")
 
     def on_click_deactivate(self, button):
         print()

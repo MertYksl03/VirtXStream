@@ -7,15 +7,15 @@ from gui.main_window import MainWindow
 from src.dummy import Dummy
 
 import threading
-import time
-import os
 import json
+import os
 
 class MyApp(Gtk.Application):
 
     def __init__(self):
         super().__init__(application_id="org.gnome.X-Vnc")  # Add an application ID
         self.main_window = None
+        self.data = None
 
     def do_activate(self):
         self.main_window = MainWindow(application=self)
@@ -27,9 +27,12 @@ class MyApp(Gtk.Application):
 
     def initialize_app(self):
         # Read the configuration from config.json
+        # GLib.idle_add(self.load_data)
+        self.load_data()
+
         # These variables will be loaded from config.json
-        file_path = "testfiles/"
-        port_name = "HDMI-1-0"
+        file_path = self.data["x"]["file_path"]
+        port_name = self.data["x"]["default_port"]
 
         # Initialize Dummy class
         dummy_instance = Dummy()
@@ -41,12 +44,7 @@ class MyApp(Gtk.Application):
 
         # Load additional data
         # self.load_data()
-        GLib.idle_add(self.main_window.show_error_dialog, "Loadded data")
-
-    def load_data(self):
-        # TODO: Load data from json file
-        print()
-
+        
     def show_critical_error(self, message):
         """
         Show a critical error dialog and close the app when the user presses OK.
@@ -69,3 +67,19 @@ class MyApp(Gtk.Application):
         # Close the application if the user presses OK
         if response == Gtk.ResponseType.OK:
             self.quit()  # Close the program
+
+    # NON-UI FUNCTIONS
+    def load_data(self):
+        try:
+            # Path to the JSON file
+            json_path = os.path.join(os.path.dirname(__file__), "src/config.json")
+
+            # Load the JSON file
+            with open(json_path, "r") as file:
+                self.data = json.load(file)
+        except FileNotFoundError:
+            self.show_critical_error("Error: JSON file not found.")
+            self.data = {}  # Fallback to an empty dictionary
+        except json.JSONDecodeError:
+            self.show_critical_error("Error: Invalid JSON format.")
+            self.data = {}  # Fallback to an empty dictionary
