@@ -83,3 +83,4 @@ class MyApp(Gtk.Application):
         except json.JSONDecodeError:
             self.show_critical_error("Error: Invalid JSON format.")
             self.data = {}  # Fallback to an empty dictionary
+
