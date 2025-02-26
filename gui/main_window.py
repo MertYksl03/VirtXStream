@@ -10,11 +10,12 @@ WIDTH = 1280
 HEIGHT = 720
 
 class MainWindow(Gtk.ApplicationWindow):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs, title = "X-vnc")
+    def __init__(self, app):
+        super().__init__(title = "X-vnc")
         self.set_default_size(WIDTH, HEIGHT)
         self.set_position(Gtk.WindowPosition.CENTER)
         self.set_border_width(10)
+        self.app = app
 
         # Load external CSS
         provider = Gtk.CssProvider()
@@ -36,15 +37,19 @@ class MainWindow(Gtk.ApplicationWindow):
         # message = "Hello this is a message"
         # label = Gtk.Label(label=message)
         # box_upper.add(label)
+        grid = Gtk.Grid()
+        box_upper.add(grid)
 
-        button = Gtk.Button(label="Configure")
-        button.connect("clicked", self.on_button_clicked)
-        box_upper.add(button)
+        button_configure = Gtk.Button(label="Configure")
+        button_configure.connect("clicked", self.on_configure_clicked)
+        grid.attach(button_configure, 1, 0, 1, 1)
 
-    def on_button_clicked(self, button):
+
+    def on_configure_clicked(self, button):
         # Open the configuration window
-        config_window = ConfigWindow(self)
+        config_window = ConfigWindow(self, self.app.on_config_saved, self.app.get_ports)
         config_window.show_all()
+
 
     def show_error_dialog(self, message):
         dialog = Gtk.MessageDialog(
