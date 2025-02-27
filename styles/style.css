@@ -1,19 +1,1 @@
-@define-color bg_color rgb(15, 23, 42);
-
-window {
-    background-color: @bg_color; 
-}
-
-#button1 {
-    background-color: red;
-}
-
-#box_lower{
-    background: red;
-}
-
-#error-label {
-    color: red;
-    font-weight: bold;
-}
 

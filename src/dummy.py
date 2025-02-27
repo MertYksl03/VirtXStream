@@ -8,23 +8,17 @@ class Dummy:
 
     def __init__(self):
         self.__file_path = None
-        self.__port_name = None
         self.__nvidia_conf = None
         self.__dummy_data = None
-        self.__ports = []
         
         self.is_dummy_activated = False
 
-    def initialize(self, file_path, port_name):
+    def initialize(self,file_path, port_name):
         self.__file_path = file_path
-        self.__ports = self.get_ports()
 
         # TODO: I don't know what to do when the port is not valid
         # if not self.check_port_is_valid(self.__ports, self.__port_name):
             # sys.exit(2)
-            
-        
-        self.__port_name = port_name
 
         # Read the files 
         self.__nvidia_conf = FileManager.read_file(file_path + "10-nvidia.conf")
@@ -80,22 +74,25 @@ class Dummy:
             except:
                 return False
 
-    def get_ports(self):         
-        # Run the xrandr command and capture the output
-        result = subprocess.run(['xrandr'], stdout=subprocess.PIPE, text=True)
-        output = result.stdout
+    # def get_ports_from_X(self):         
+    #     # Run the xrandr command and capture the output
+    #     result = subprocess.run(['xrandr'], stdout=subprocess.PIPE, text=True)
+    #     output = result.stdout
 
-        # Extract valid port names (lines that start with a port name)
-        ports = []
-        for line in output.splitlines():
-            if " connected" in line or " disconnected" in line:
-                port = line.split()[0]  # The first word is the port name
-                ports.append(port)
+    #     # Extract valid port names (lines that start with a port name)
+    #     ports = []
+    #     for line in output.splitlines():
+    #         if " connected" in line or " disconnected" in line:
+    #             port = line.split()[0]  # The first word is the port name
+    #             ports.append(port)
         
-        return ports
+    #     return ports 
     
-    def check_port_is_valid(self, ports, port_name):
-        if port_name in ports:
-            return True
-        else:
-            return False
+    # def check_port_is_valid(self, ports, port_name):
+    #     if port_name in ports:
+    #         return True
+    #     else:
+    #         return False
+        
+    # def get_ports(self):
+    #     return self.ports
