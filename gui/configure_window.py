@@ -72,7 +72,7 @@ class ConfigWindow(Gtk.Window):
             file_path = file_path + "/"
 
 
-        # call the callback funtion with enterd values
+        # Call the callback funtion with enterd values
         if self.on_save_callback:
             self.on_save_callback(file_path, port_name)
 
@@ -80,7 +80,6 @@ class ConfigWindow(Gtk.Window):
         self.destroy()
 
     def show_error_dialog(self, message):
-        # Create an error dialog
         dialog = Gtk.MessageDialog(
             parent=self,
             flags=Gtk.DialogFlags.MODAL,
@@ -89,5 +88,5 @@ class ConfigWindow(Gtk.Window):
             message_format=message
         )
         dialog.set_title("Error")
-        dialog.run()  # Show the dialog and wait for user response
-        dialog.destroy()  # Close the dialog
+        dialog.run()
+        dialog.destroy()
