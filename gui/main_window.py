@@ -14,6 +14,7 @@ class MainWindow(Gtk.ApplicationWindow):
         self.set_default_size(WIDTH, HEIGHT)
         self.set_position(Gtk.WindowPosition.CENTER)
         self.set_border_width(10)
+        self.set_name("main-window") # name for css
         self.app = app
 
         # Load external CSS
@@ -64,28 +65,28 @@ class MainWindow(Gtk.ApplicationWindow):
             # First Box: About xconf.d configs
             box_1 = self.box_1().get_box()
 
-            label = Gtk.Label(" ") # TEMPORARY
+            # label = Gtk.Label(" ") # TEMPORARY
             label1 = Gtk.Label(" ") # TEMPORARY
             label2 = Gtk.Label(" ") # TEMPORARY
 
             # Second Box: The settings about the virtual display(resolution etc.)
-            box_2 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+            box_2 = self.box_2().get_box()
 
             # Third Box: The settings and status about ADB server
-            box_3 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+            box_3 = self.box_3().get_box()
 
             # Fourth Box: The settings and status about VNC server
-            box_4 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+            box_4 = self.box_4().get_box()
             
-            box_2.add(label)
-            box_3.add(label1)
-            box_4.add(label2)
+            # box_2.add(label)
+            # box_3.add(label1)
+            # box_4.add(label2)
             
             # Add small boxes to the main box
-            self.box_upper.pack_start(box_1, True, True, 0)
-            self.box_upper.pack_start(box_2, True, True, 0)
-            self.box_upper.pack_start(box_3, True, True, 0)
-            self.box_upper.pack_start(box_4, True, True, 0)
+            self.box_upper.pack_start(box_1, True, True, 10)
+            self.box_upper.pack_start(box_2, True, True, 10)
+            self.box_upper.pack_start(box_3, True, True, 10)
+            self.box_upper.pack_start(box_4, True, True, 10)
     
             
         def get_box(self):
@@ -95,7 +96,9 @@ class MainWindow(Gtk.ApplicationWindow):
         class box_1:
 
             def __init__(self):
+
                 self.box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+                self.box.set_name("upper_box_boxes")
 
                 # User should see and know what this part about
                 label_title = Gtk.Label("DUMMY CONFIG")
@@ -113,7 +116,76 @@ class MainWindow(Gtk.ApplicationWindow):
 
             def get_box(self):
                 return self.box
+
+        class box_2:
+
+            def __init__(self):
+
+                self.box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+                self.box.set_name("upper_box_boxes")
+
+                label_title = Gtk.Label("VIRTUAL DISPLAY")
+                self.box.pack_start(label_title, True, True, 10)
+
+                # This label shows the status about the virtaul display(resolution etc.)
+                label_status = Gtk.Label("Resolution : 1920x1080") # For now
+                self.box.pack_start(label_status, True, True, 10)
+
+                button_configure = Gtk.Button(label="Configure")
+                self.box.pack_start(button_configure, False, False, 10)
+
+                button_apply = Gtk.Button(label="Apply")
+                self.box.pack_start(button_apply, False, False, 10)
+
+            def get_box(self):
+                return self.box
                 
+        class box_3:
+            def __init__(self):
+
+                self.box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+                self.box.set_name("upper_box_boxes")
+
+                # User should see and know what this part about
+                label_title = Gtk.Label("ADB SERVER")
+                self.box.pack_start(label_title, True, True, 10)
+
+                # The label about the status. This label will be dynamicly changes and displays the status of dummy config
+                label_status = Gtk.Label("Ready")
+                self.box.pack_start(label_status, True, True, 10)
+                
+                button_configure = Gtk.Button(label="Configure")
+                self.box.pack_start(button_configure, False, False, 10)
+                
+                button_activate = Gtk.Button(label="Save")
+                self.box.pack_start(button_activate, False, False, 10)
+
+            def get_box(self):
+                return self.box
+
+        class box_4:
+            def __init__(self):
+
+                self.box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+                self.box.set_name("upper_box_boxes")
+
+                # User should see and know what this part about
+                label_title = Gtk.Label("VNC SERVER")
+                self.box.pack_start(label_title, True, True, 10)
+
+                # The label about the status. This label will be dynamicly changes and displays the status of dummy config
+                label_status = Gtk.Label("Ready")
+                self.box.pack_start(label_status, True, True, 10)
+                
+                button_configure = Gtk.Button(label="Configure")
+                self.box.pack_start(button_configure, False, False, 10)
+                
+                button_activate = Gtk.Button(label="Save")
+                self.box.pack_start(button_activate, False, False, 10)
+
+            def get_box(self):
+                return self.box
+
 
         
     class lower_box:
@@ -126,7 +198,7 @@ class MainWindow(Gtk.ApplicationWindow):
             spacer_right = Gtk.Label(" ")
 
             box_main = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-            box_main.set_name("asd")
+            box_main.set_name("lower_box")
             
             status = Gtk.Label("DISCONNECTED")
             status.set_name("lower_box_status")

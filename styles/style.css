@@ -1,15 +1,24 @@
+#main-window {
+    background-color: rgb(162, 178, 193);
+}
+
+
+#upper_box_boxes {
+    border-radius: 30px;
+    /* background-color: lightskyblue; */
+    /* background-color: rgb(43, 52, 71); */
+    background-color: rgb(38, 43, 54);
+}
+
+#upper_box_boxes button {
+    min-height: 40px;
+    border-radius: 40px;
+    background-color: black;
+}
+
 
 #lower_box_status{
     font-size: 500%;
     /* color: greenyellow; */
     color: red;
-}
-
-#dsa{
-    font-size: xx-large;
-}
-
-
-#asd{
-    background-color: rgb(39, 38, 27);
 }
