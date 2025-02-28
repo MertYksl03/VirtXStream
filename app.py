@@ -60,7 +60,22 @@ class MyApp(Gtk.Application):
         
         # self.print_dummy_variables()
         
+    def show_error_message(self, message):
+        "Show a error message to the user"
+        dialog = Gtk.MessageDialog(
+            transient_for=self.main_window if self.main_window else None,
+            flags=0,
+            message_type=Gtk.MessageType.ERROR,
+            buttons=Gtk.ButtonsType.OK,
+            text="Error",
+        )
+        dialog.format_secondary_text(message)  # Add detailed error message
 
+        # Run the dialog and wait for user response
+        response = dialog.run()
+
+        # Destroy the dialog after the user responds
+        dialog.destroy()
 
     def show_critical_error(self, message):
         """
@@ -103,7 +118,13 @@ class MyApp(Gtk.Application):
 
 
     def on_config_saved(self, file_path, port_name):
-        return self.dummy_instance.initialize(file_path, port_name)
+        status = self.dummy_instance.initialize(file_path, port_name)
+        if status[0] == False:
+            error_message = status[1]
+            GLib.idle_add(self.show_error_message, error_message)
+            return False # Return false, so user can enter a valid filepath
+        else:
+            return True
     
     # FOR DEVELOPMENT 
     def print_dummy_variables(self):

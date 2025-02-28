@@ -4,7 +4,7 @@ gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gdk #type: ignore
 
 class ConfigWindow(Gtk.Window):
-    def __init__(self, parent, on_save_callback, ports):
+    def __init__(self, on_save_callback, ports, parent):
         Gtk.Window.__init__(self, title="Configuration Window")
         self.set_resizable(False)
         self.set_position(Gtk.WindowPosition.CENTER)
@@ -12,8 +12,10 @@ class ConfigWindow(Gtk.Window):
         self.set_transient_for(parent)
         self.set_modal(True)
 
-        # Store the callback function
+        # Store the ports
         self.ports = ports
+
+        # Store the callback function
         self.on_save_callback = on_save_callback
 
         # Create a grid to arrange widgets
@@ -73,10 +75,10 @@ class ConfigWindow(Gtk.Window):
 
         # Call the callback funtion with enterd values
         if self.on_save_callback:
-            self.on_save_callback(file_path, port_name)
-
-        # Close the configuration window
-        self.destroy()
+            if self.on_save_callback(file_path, port_name) == True:
+                # Close the configuration window
+                self.destroy()
+    
 
     def show_error_dialog(self, message):
         dialog = Gtk.MessageDialog(

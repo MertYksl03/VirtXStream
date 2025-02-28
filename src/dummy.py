@@ -27,12 +27,12 @@ class Dummy:
         # Read the files 
         self.__nvidia_conf = FileManager.read_file(file_path + "10-nvidia.conf")
         if self.__nvidia_conf == False:
-            return False, "Couldn't read nvidia config file"
+            return False, "Couldn't read nvidia config file. \nFile path might be wrong"
         
         dummy_template = FileManager.read_file("dummy_template.txt")
         
         if dummy_template == False:
-            return False, "Couldn't read dummy_template.txt"
+            return False, "Couldn't read dummy_template.txt \nFile path might be wrong" 
 
         # Create the dummy config data
         self.__dummy_data = self.__nvidia_conf + "\n" + dummy_template.replace("*****", port_name)
