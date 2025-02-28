@@ -55,7 +55,7 @@ class MainWindow(Gtk.ApplicationWindow):
         self.add(box_outer)
 
 
-        box_upper = BoxUpper(self.dummy_instance.ports, self.app.on_config_saved, self)
+        box_upper = BoxUpper(self.app, self)
         # grid_outer.attach(box_upper, 0, 0, 1, 1)
         box_outer.pack_start(box_upper.get_box(), True, True, 0)
 
@@ -65,8 +65,8 @@ class MainWindow(Gtk.ApplicationWindow):
         
 
     def on_restore_clicked(self, button):
-        print("Restoring default settings...")
-        # Add your logic to restore default settings here
+        if self.app.restore_defaults() == True:
+            self.app.show_info_dialog("Restoring to default is succesful")
 
 
     def show_error_dialog(self, message):

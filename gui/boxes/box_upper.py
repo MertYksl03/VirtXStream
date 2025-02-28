@@ -8,10 +8,8 @@ from gui.configure_window import ConfigWindow
 
 class BoxUpper:
 
-    def __init__(self, ports, on_config_saved_callback, parent_window):
-        
-        self.ports = ports
-        self.on_config_saved_callback = on_config_saved_callback
+    def __init__(self, app, parent_window):
+        self.app = app
         self.box_upper = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         self.parent_window = parent_window
         # Create and add sub-boxes
@@ -22,6 +20,8 @@ class BoxUpper:
 
     def get_box(self):
         return self.box_upper
+    
+    # FUNCTIONS THOSE ARE USED BY ALL BOXES SHOULD BE RIGHT BELOW THIS LINE
 
     # This box holds the settings and status about dummy config
     def create_config_box(self):
@@ -41,18 +41,18 @@ class BoxUpper:
         button_configure.connect("clicked", self.on_configure_clicked)
         box.pack_start(button_configure, False, False, 10)
 
-        button_save = Gtk.Button(label="Save")
-        button_save.connect("clicked", self.on_save_clicked)
+        button_save = Gtk.Button(label="Enable")
+        button_save.connect("clicked", self.on_enable_clicked)
         box.pack_start(button_save, False, False, 10)
 
         return box
 
     def on_configure_clicked(self, button):
         # Open the configuration window
-        config_window = ConfigWindow(self.on_config_saved_callback, self.ports, self.parent_window)
+        config_window = ConfigWindow(self.app.on_config_saved, self.app.dummy_instance.ports, self.parent_window, "dummy")
         config_window.show_all()
 
-    def on_save_clicked(self, button):
+    def on_enable_clicked(self, button):
         # Handle save logic
         print("Save button clicked")
 

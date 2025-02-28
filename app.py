@@ -37,13 +37,13 @@ class MyApp(Gtk.Application):
 
         # These variables will be loaded from config.json
         try :
-            self.file_path = self.data["default"]["x"]["file_path"]
+            self.file_path = self.data["user-settings"]["x"]["file_path"]
         except Exception as e:
             self.show_critical_error(str(e))
             return
 
         try :
-            self.port_name = self.data["default"]["x"]["default_port"]
+            self.port_name = self.data["user-settings"]["x"]["default_port"]
         except Exception as e:
             self.show_critical_error(str(e))
             return
@@ -58,7 +58,27 @@ class MyApp(Gtk.Application):
             GLib.idle_add(self.show_critical_error, error_message)
             return  # Stop further execution
         
-        # self.print_dummy_variables()
+
+        # if initialize is succesfull then return true
+        return True
+    
+    def restore_defaults(self):
+        self.data["user-settings"] = self.data["default"]
+
+        self.save_user_settings()
+        
+        return self.initialize_app()
+
+    def show_info_dialog(self, message):
+        dialog = Gtk.MessageDialog(
+            transient_for=self.main_window if self.main_window else None,
+            flags=0,
+            message_type=Gtk.MessageType.INFO,
+            buttons=Gtk.ButtonsType.OK,
+            text=message,
+        )
+        dialog.run()
+        dialog.destroy()
         
     def show_error_message(self, message):
         "Show a error message to the user"
@@ -124,8 +144,22 @@ class MyApp(Gtk.Application):
             GLib.idle_add(self.show_error_message, error_message)
             return False # Return false, so user can enter a valid filepath
         else:
-            return True
+            self.data["user-settings"]["x"]["file_path"] = file_path
+            self.data["user-settings"]["x"]["default_port"] = port_name
+
+            # Write the new json file 
+            return self.save_user_settings()
+            
     
+    def save_user_settings(self): # By writing into config.json file 
+        try:
+            with open("src/config.json", 'w') as json_file:
+                json.dump(self.data, json_file, indent=4)  # indent=4 for pretty-printing
+                return True
+        except Exception as e:
+            self.main_window.show_error_dialog(str(e))
+            return False
+
     # FOR DEVELOPMENT 
     def print_dummy_variables(self):
         print("Portname is " + self.dummy_instance.port_name)

@@ -4,7 +4,7 @@ gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gdk #type: ignore
 
 class ConfigWindow(Gtk.Window):
-    def __init__(self, on_save_callback, ports, parent):
+    def __init__(self, on_save_callback, ports, parent, which_config):
         Gtk.Window.__init__(self, title="Configuration Window")
         self.set_resizable(False)
         self.set_position(Gtk.WindowPosition.CENTER)
@@ -18,17 +18,22 @@ class ConfigWindow(Gtk.Window):
         # Store the callback function
         self.on_save_callback = on_save_callback
 
+        if which_config == "dummy":
+            Gtk.Window.set_title(self, "Dummy Config Settings")
+            self.add(self.create())
+
+
+    def create(self):
         # Create a grid to arrange widgets
         grid = Gtk.Grid()
         grid.set_column_spacing(10)
         grid.set_row_spacing(10)
-        self.add(grid)
 
         # Info about file path
         info_file_path_string = """Enter the file path to your Xorg config files"""
-        self.info_file_path_label = Gtk.Label()
-        self.info_file_path_label.set_label(info_file_path_string)
-        grid.attach(self.info_file_path_label, 0, 0, 2, 1)  # Span across 2 columns
+        info_file_path_label = Gtk.Label()
+        info_file_path_label.set_label(info_file_path_string)
+        grid.attach(info_file_path_label, 0, 0, 2, 1)  # Span across 2 columns
 
         # File path entry
         grid.attach(Gtk.Label(label="File Path:"), 0, 1, 1, 1)
@@ -38,9 +43,9 @@ class ConfigWindow(Gtk.Window):
 
         # Info about port name
         info_port_name_string = "Enter the port name that you want to connect your virtual display"
-        self.info_port_name_label = Gtk.Label()
-        self.info_port_name_label.set_label(info_port_name_string)
-        grid.attach(self.info_port_name_label, 0, 2, 2, 1)  # Span across 2 columns
+        info_port_name_label = Gtk.Label()
+        info_port_name_label.set_label(info_port_name_string)
+        grid.attach(info_port_name_label, 0, 2, 2, 1)  # Span across 2 columns
 
         # Port name entry
         grid.attach(Gtk.Label(label="Port Name:"), 0, 3, 1, 1)
@@ -53,19 +58,22 @@ class ConfigWindow(Gtk.Window):
         save_button.connect("clicked", self.on_save_clicked)
         grid.attach(save_button, 1, 4, 1, 1)
 
+        return grid
+
     def on_save_clicked(self, widget):
+
         file_path = self.file_path_entry.get_text().strip()
         port_name = self.port_name_entry.get_text().strip()
 
         # First check if the entries are not empty
         if not file_path or not port_name: 
             # show an error dialog to user
-            self.show_error_dialog("Both fields are required\n" + "You need to fill the both fields")
+            self.show_error_dialog("Both fields are required\nYou need to fill the both fields")
             return 
         
         if self.ports:
             if not port_name in self.ports:
-                self.show_error_dialog("Invalid port name \n" + "Avaible ports: " + str(self.ports))
+                self.show_error_dialog("Invalid port name \nAvaible ports: " + str(self.ports))
                 return
         
         # Add '/' to end of the filepath if the user didnt put it 
