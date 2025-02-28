@@ -5,30 +5,34 @@ import subprocess
 from utils.file_manager import FileManager
 
 class Dummy:
+    # Global variables
+    file_path = None        # Holds the file path of Xorg config files
+    port_name = None        # Holds the name of the display port 
+    status = None           # Holds the status 
+    ports = None            # Holds all the ports the computer has for display
 
     def __init__(self):
-        self.__file_path = None
+        # Private variables
         self.__nvidia_conf = None
         self.__dummy_data = None
         
         self.is_dummy_activated = False
 
     def initialize(self,file_path, port_name):
-        self.__file_path = file_path
-
-        # TODO: I don't know what to do when the port is not valid
-        # if not self.check_port_is_valid(self.__ports, self.__port_name):
-            # sys.exit(2)
+        self.file_path = file_path
+        self.port_name = port_name
+        self.ports = self.get_ports()
+        self.status = self.check_status()
 
         # Read the files 
         self.__nvidia_conf = FileManager.read_file(file_path + "10-nvidia.conf")
         if self.__nvidia_conf == False:
-            return False
+            return False, "Couldn't read nvidia config file"
         
         dummy_template = FileManager.read_file("dummy_template.txt")
         
         if dummy_template == False:
-            return False
+            return False, "Couldn't read dummy_template.txt"
 
         # Create the dummy config data
         self.__dummy_data = self.__nvidia_conf + "\n" + dummy_template.replace("*****", port_name)
@@ -37,39 +41,84 @@ class Dummy:
         self.is_dummy_activated = self.check_dummy_activated()
 
         # If everything is ok then return True, meaning the initialize is succesfull
-        return True
+        return True, " "
 
     def check_dummy_activated(self):
-        file_path = self.__file_path + "10-dummy.conf"
+        file_path = self.file_path + "10-dummy.conf"
         # Check if the file existed and the content of the file is same as it should be
         if FileManager.is_file_existed(file_path) and FileManager.read_file(file_path) == self.__dummy_data:
             return True
         else: 
             return False
+        
+    # I am thinking about this function should return what user will see in the gui like "Acitaveted", "Reboot required", "Disabled". 
+    # For now it returns the message string but ıdk maybe for later this will be return the status code like 0 = disabled, 1 = reboot required, 
+    # 2 = activated etc.
+    def check_status(self):
+        result =  subprocess.run(['xrandr'], stdout=subprocess.PIPE, text=True)
+        output = result.stdout
+
+        is_port_shown_connected = False
+        for line in output.splitlines():
+            if " connected " in line and self.port_name in line: 
+                is_port_shown_connected = True
+
+        if self.check_dummy_activated() and is_port_shown_connected:
+            return "Acitaved"
+        elif (self.check_dummy_activated() and not is_port_shown_connected) or (not self.check_dummy_activated() and is_port_shown_connected):
+            return "Reboot required"
+        else:
+            return "Disabled"
+
+    # These two functions return the status of the operation and error or succes message. 
+    # index 0 is status 
+    # index 1 is the message 
 
     def activate_dummy_config(self):
         config_file_name = "10-dummy.conf"
         # Dont do a thing if the dummy is already activated
         if self.check_dummy_activated():
-            return False
+            return False, "Dummy is already acitavated"
         
         # Create, write the dummy-config and check its content
-        if FileManager.write_file(self.__file_path + config_file_name, self.__dummy_data) and self.check_dummy_activated():
-            return True
+        if FileManager.write_file(self.file_path + config_file_name, self.__dummy_data) and self.check_dummy_activated():
+            return True, "Dummy config activated"
         else :
-            return False
+            return False, "Couldn't create a dummy config"
 
     # This function deletes the dummy config
     def deactive_dummy_config(self):
-        file_path =  self.__file_path + "10-dummy.conf"
+        file_path =  self.file_path + "10-dummy.conf"
 
         # Check if the config is already deleted
         if not FileManager.is_file_existed(file_path):
-            return True # The file is deleted
+            return False, "Dummy is already disabled"
         else:
             # Delete the file
             try: 
                 os.remove(file_path)
-                return True
+                return True, "Dummy config deleted succesfully"
             except:
-                return False
+                return False, "Couldn't delete the dummy config"
+
+    def get_ports(self):
+        # Run the xrandr command and capture the output
+        result = subprocess.run(['xrandr'], stdout=subprocess.PIPE, text=True)
+        output = result.stdout
+
+        # Extract valid port names (lines that start with a port name)
+        ports = []
+        for line in output.splitlines():
+            if " connected" in line or " disconnected" in line:
+                if "eDP" in line:
+                    continue
+                port = line.split()[0]  # The first word is the port name
+                ports.append(port)
+        
+        return ports 
+    
+    # FOR DEVELOPMENT
+    def print_variables(self):
+        print("Portname is " + self.port_name)
+        print("Filepathh is " + self.file_path)
+        print("The status is  " + self.check_status())

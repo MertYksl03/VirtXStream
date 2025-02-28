@@ -4,7 +4,7 @@ gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gdk #type: ignore
 
 class ConfigWindow(Gtk.Window):
-    def __init__(self, parent, on_save_callback, get_ports_callback):
+    def __init__(self, parent, on_save_callback, ports):
         Gtk.Window.__init__(self, title="Configuration Window")
         self.set_resizable(False)
         self.set_position(Gtk.WindowPosition.CENTER)
@@ -13,7 +13,7 @@ class ConfigWindow(Gtk.Window):
         self.set_modal(True)
 
         # Store the callback function
-        self.get_ports_callback = get_ports_callback
+        self.ports = ports
         self.on_save_callback = on_save_callback
 
         # Create a grid to arrange widgets
@@ -61,10 +61,9 @@ class ConfigWindow(Gtk.Window):
             self.show_error_dialog("Both fields are required\n" + "You need to fill the both fields")
             return 
         
-        if self.get_ports_callback:
-            ports = self.get_ports_callback()
-            if not port_name in ports:
-                self.show_error_dialog("Invalid port name \n" + "Avaible ports: " + str(ports))
+        if self.ports:
+            if not port_name in self.ports:
+                self.show_error_dialog("Invalid port name \n" + "Avaible ports: " + str(self.ports))
                 return
         
         # Add '/' to end of the filepath if the user didnt put it 

@@ -13,29 +13,26 @@ import os
 import subprocess
 
 class MyApp(Gtk.Application):
+    # Global variables
+    dummy_instance = None
 
     def __init__(self):
         super().__init__(application_id="org.gnome.X-Vnc")  # Add an application ID
+        # This varibales are private variables
         self.main_window = None
-        self.data = None                                    # App's config data stored in config.json
-        self.file_path = None                               # The file path of Xorg config files
-        self.port_name = None                               # The port name the virtual display will be connected to
-        self.ports = []                                     # All the port the computer has for display
-        self.dummy_instance = None                      
+        self.data = None                                    # App's config data stored in config.json             
         
 
     def do_activate(self):
+        self.initialize_app()
+        
         self.main_window = MainWindow(self)
         self.add_window(self.main_window)
         self.main_window.show_all()
 
-        # Initialization in a separate thread
-        # threading.Thread(target=self.initialize_app, daemon=True).start()
-        self.initialize_app()
 
     def initialize_app(self):
         # Read the configuration from config.json
-        # GLib.idle_add(self.load_data)
         self.load_data()
 
         # These variables will be loaded from config.json
@@ -51,18 +48,18 @@ class MyApp(Gtk.Application):
             self.show_critical_error(str(e))
             return
 
-        # IDK if this is necessary
-        self.ports = self.get_ports()
-
         # Initialize Dummy class
         self.dummy_instance = Dummy()
-        if not self.dummy_instance.initialize(self.file_path, self.port_name):
+        status = self.dummy_instance.initialize(self.file_path, self.port_name)
+        if status[0] == False:
             # Display error message and close the app
-            error_message = "Failed to initialize Dummy class. The application will now close."
+            # error_message = "Failed to initialize Dummy class. The application will now close."
+            error_message = status[1]
             GLib.idle_add(self.show_critical_error, error_message)
             return  # Stop further execution
         
-        self.print_()
+        # self.print_dummy_variables()
+        
 
 
     def show_critical_error(self, message):
@@ -106,35 +103,12 @@ class MyApp(Gtk.Application):
 
 
     def on_config_saved(self, file_path, port_name):
-        self.file_path = file_path
-        self.port_name = port_name
-        self.print_()  # FOR DEVELOPMENT PURPOSES
         return self.dummy_instance.initialize(file_path, port_name)
     
-    # FOR DEVELOPMENT PURPOSES
-    def print_(self):
-        print(self.file_path)
-        print(self.port_name)
-
-    def get_ports(self):
-        # Run the xrandr command and capture the output
-        result = subprocess.run(['xrandr'], stdout=subprocess.PIPE, text=True)
-        output = result.stdout
-
-        # Extract valid port names (lines that start with a port name)
-        ports = []
-        for line in output.splitlines():
-            if " connected" in line or " disconnected" in line:
-                if "eDP" in line:
-                    continue
-                port = line.split()[0]  # The first word is the port name
-                ports.append(port)
-        
-        return ports 
-    
-    # def on_config_saved(self, file_path, port_name):
-    #     # This function will be called when the "Save" button is clicked
-    #     print(f"File Path from app.py: {file_path}")
-    #     print(f"Port Name from app.py: {port_name}")
+    # FOR DEVELOPMENT 
+    def print_dummy_variables(self):
+        print("Portname is " + self.dummy_instance.port_name)
+        print("Filepathh is " + self.dummy_instance.file_path)
+        print("The status is  " + self.dummy_instance.check_status())
 
 

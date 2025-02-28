@@ -9,6 +9,10 @@ WIDTH = 1280
 HEIGHT = 720
 
 class MainWindow(Gtk.ApplicationWindow):
+    # Global Variables
+    # dummy_instance = None
+    app = None
+
     def __init__(self, app):
         super().__init__(title = "X-vnc")
         self.set_default_size(WIDTH, HEIGHT)
@@ -16,6 +20,9 @@ class MainWindow(Gtk.ApplicationWindow):
         self.set_border_width(10)
         self.set_name("main-window") # name for css
         self.app = app
+        
+        # With holding the refarance to the dummy_instance all windows have the information about the dummy config(filepath, ports, portname etc.)
+        self.dummy_instance = app.dummy_instance
 
         # Load external CSS
         provider = Gtk.CssProvider()
@@ -46,7 +53,7 @@ class MainWindow(Gtk.ApplicationWindow):
         self.add(box_outer)
 
 
-        box_upper = self.box_upper().get_box()
+        box_upper = self.box_upper(self.dummy_instance.ports).get_box()
         # grid_outer.attach(box_upper, 0, 0, 1, 1)
         box_outer.pack_start(box_upper, True, True, 0)
 
@@ -54,10 +61,6 @@ class MainWindow(Gtk.ApplicationWindow):
         box_lower = self.lower_box().get_box()
         box_outer.pack_start(box_lower, True, True, 0)
         
-    def on_configure_clicked(self, button):
-        # Open the configuration window
-        config_window = ConfigWindow(self, self.app.on_config_saved, self.app.get_ports)
-        config_window.show_all()
 
     def on_restore_clicked(self, button):
         print("Restoring default settings...")
@@ -78,11 +81,11 @@ class MainWindow(Gtk.ApplicationWindow):
 
     class box_upper:
 
-        def __init__(self):
+        def __init__(self,ports):
             self.box_upper = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
 
             # First Box: About xconf.d configs
-            box_1 = self.box_1().get_box()
+            box_1 = self.box_1(ports).get_box()
 
             # label = Gtk.Label(" ") # TEMPORARY
             label1 = Gtk.Label(" ") # TEMPORARY
@@ -114,7 +117,8 @@ class MainWindow(Gtk.ApplicationWindow):
          # First Box: About xconf.d configs
         class box_1:
 
-            def __init__(self):
+            def __init__(self, ports):
+                self.ports = ports
 
                 self.box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
                 self.box.set_name("upper_box_boxes")
@@ -129,9 +133,15 @@ class MainWindow(Gtk.ApplicationWindow):
                 
                 button_configure = Gtk.Button(label="Configure")
                 self.box.pack_start(button_configure, False, False, 10)
+                button_configure.connect("clicked", self.on_configure_clicked)
                 
                 button_activate = Gtk.Button(label="Save")
                 self.box.pack_start(button_activate, False, False, 10)
+
+            def on_configure_clicked(self, button):
+                # Open the configuration window
+                config_window = ConfigWindow(self, self.app.on_config_saved, self.ports)
+                config_window.show_all()
 
             def get_box(self):
                 return self.box
