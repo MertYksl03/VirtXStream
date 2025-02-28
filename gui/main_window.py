@@ -34,13 +34,17 @@ class MainWindow(Gtk.ApplicationWindow):
         self.set_titlebar(header_bar)
 
         # A button to restrore the default settings 
-        restore_button = Gtk.Button(label="Restore Defaults")
-        restore_button.connect("clicked", self.on_restore_clicked)
-        header_bar.pack_start(restore_button)
+        button_restore = Gtk.Button(label="Restore Defaults")
+        button_restore.connect("clicked", self.on_restore_clicked)
+        header_bar.pack_start(button_restore)
+
+        # A help button with a link to this project's repo
+        button_help = Gtk.LinkButton(uri="https://github.com/MertYksl03/X-Vnc-gui", label="Help")
+        header_bar.pack_end(button_help)
 
         # A button with a link to my Github profile
-        github_button = Gtk.LinkButton(uri="https://github.com/MertYksl03/", label="Github")
-        header_bar.pack_end(github_button)
+        button_github = Gtk.LinkButton(uri="https://github.com/MertYksl03/", label="Github")
+        header_bar.pack_end(button_github)
 
         box_outer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.add(box_outer)
