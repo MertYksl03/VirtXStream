@@ -1,11 +1,23 @@
 {
-    "x" : {
-        "file_path": "testfiles/",
-        "default_port": "HDMI-1-0"
+    "default": {
+        "x" : {
+            "file_path": "testfiles/",
+            "default_port": "HDMI-1-0"
+        },
+    
+        "Vnc" : {
+            "default_port": "5900"
+        }
     },
-
-    "Vnc" : {
-        "default_port": "5900"
+    
+    "user-settings" : {
+        "x" : {
+            "file_path": "testfiles/",
+            "default_port": "HDMI-1-0"
+        },
+    
+        "Vnc" : {
+            "default_port": "5900"
+        }
     }
-
 }

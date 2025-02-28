@@ -1,4 +1,5 @@
 import gi
+
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, GLib  # type: ignore
 
@@ -29,7 +30,8 @@ class MyApp(Gtk.Application):
         self.main_window.show_all()
 
         # Initialization in a separate thread
-        threading.Thread(target=self.initialize_app, daemon=True).start()
+        # threading.Thread(target=self.initialize_app, daemon=True).start()
+        self.initialize_app()
 
     def initialize_app(self):
         # Read the configuration from config.json
@@ -37,8 +39,17 @@ class MyApp(Gtk.Application):
         self.load_data()
 
         # These variables will be loaded from config.json
-        self.file_path = self.data["x"]["file_path"]
-        self.port_name = self.data["x"]["default_port"]
+        try :
+            self.file_path = self.data["default"]["x"]["file_path"]
+        except Exception as e:
+            self.show_critical_error(str(e))
+            return
+
+        try :
+            self.port_name = self.data["default"]["x"]["default_port"]
+        except Exception as e:
+            self.show_critical_error(str(e))
+            return
 
         # IDK if this is necessary
         self.ports = self.get_ports()

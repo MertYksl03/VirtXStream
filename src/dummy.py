@@ -73,26 +73,3 @@ class Dummy:
                 return True
             except:
                 return False
-
-    # def get_ports_from_X(self):         
-    #     # Run the xrandr command and capture the output
-    #     result = subprocess.run(['xrandr'], stdout=subprocess.PIPE, text=True)
-    #     output = result.stdout
-
-    #     # Extract valid port names (lines that start with a port name)
-    #     ports = []
-    #     for line in output.splitlines():
-    #         if " connected" in line or " disconnected" in line:
-    #             port = line.split()[0]  # The first word is the port name
-    #             ports.append(port)
-        
-    #     return ports 
-    
-    # def check_port_is_valid(self, ports, port_name):
-    #     if port_name in ports:
-    #         return True
-    #     else:
-    #         return False
-        
-    # def get_ports(self):
-    #     return self.ports
