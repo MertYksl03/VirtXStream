@@ -27,6 +27,21 @@ class MainWindow(Gtk.ApplicationWindow):
             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
         )
 
+        # Create a Header Bar 
+        header_bar = Gtk.HeaderBar()
+        header_bar.set_show_close_button(True)
+        header_bar.set_title("X-Vnc")
+        self.set_titlebar(header_bar)
+
+        # A button to restrore the default settings 
+        restore_button = Gtk.Button(label="Restore Defaults")
+        restore_button.connect("clicked", self.on_restore_clicked)
+        header_bar.pack_start(restore_button)
+
+        # A button with a link to my Github profile
+        github_button = Gtk.LinkButton(uri="https://github.com/MertYksl03/", label="Github")
+        header_bar.pack_end(github_button)
+
         box_outer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.add(box_outer)
 
@@ -43,6 +58,10 @@ class MainWindow(Gtk.ApplicationWindow):
         # Open the configuration window
         config_window = ConfigWindow(self, self.app.on_config_saved, self.app.get_ports)
         config_window.show_all()
+
+    def on_restore_clicked(self, button):
+        print("Restoring default settings...")
+        # Add your logic to restore default settings here
 
 
     def show_error_dialog(self, message):
