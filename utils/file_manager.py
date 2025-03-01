@@ -1,7 +1,7 @@
 import os
 
 class FileManager:
-    #TODO: fix this. If cant read the file it returns an exception. It is unacceptable
+    
     def read_file(file_path):
         try:
             with open(file_path, "r") as file:

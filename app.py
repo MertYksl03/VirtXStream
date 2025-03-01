@@ -13,57 +13,89 @@ import os
 import subprocess
 
 class MyApp(Gtk.Application):
+    # Global variables
+    dummy_instance = None
 
     def __init__(self):
         super().__init__(application_id="org.gnome.X-Vnc")  # Add an application ID
+        # This varibales are private variables
         self.main_window = None
-        self.data = None                                    # App's config data stored in config.json
-        self.file_path = None                               # The file path of Xorg config files
-        self.port_name = None                               # The port name the virtual display will be connected to
-        self.ports = []                                     # All the port the computer has for display
-        self.dummy_instance = None                      
+        self.data = None                                    # App's config data stored in config.json             
         
 
     def do_activate(self):
+        self.initialize_app()
+        
         self.main_window = MainWindow(self)
         self.add_window(self.main_window)
         self.main_window.show_all()
 
-        # Initialization in a separate thread
-        # threading.Thread(target=self.initialize_app, daemon=True).start()
-        self.initialize_app()
 
     def initialize_app(self):
         # Read the configuration from config.json
-        # GLib.idle_add(self.load_data)
         self.load_data()
 
         # These variables will be loaded from config.json
         try :
-            self.file_path = self.data["default"]["x"]["file_path"]
+            self.file_path = self.data["user-settings"]["x"]["file_path"]
         except Exception as e:
             self.show_critical_error(str(e))
             return
 
         try :
-            self.port_name = self.data["default"]["x"]["default_port"]
+            self.port_name = self.data["user-settings"]["x"]["default_port"]
         except Exception as e:
             self.show_critical_error(str(e))
             return
 
-        # IDK if this is necessary
-        self.ports = self.get_ports()
-
         # Initialize Dummy class
         self.dummy_instance = Dummy()
-        if not self.dummy_instance.initialize(self.file_path, self.port_name):
+        status = self.dummy_instance.initialize(self.file_path, self.port_name)
+        if status[0] == False:
             # Display error message and close the app
-            error_message = "Failed to initialize Dummy class. The application will now close."
+            # error_message = "Failed to initialize Dummy class. The application will now close."
+            error_message = status[1]
             GLib.idle_add(self.show_critical_error, error_message)
             return  # Stop further execution
         
-        self.print_()
 
+        # if initialize is succesfull then return true
+        return True
+    
+    def restore_defaults(self):
+        self.data["user-settings"] = self.data["default"]
+
+        self.save_user_settings()
+        
+        return self.initialize_app()
+
+    def show_info_dialog(self, message):
+        dialog = Gtk.MessageDialog(
+            transient_for=self.main_window if self.main_window else None,
+            flags=0,
+            message_type=Gtk.MessageType.INFO,
+            buttons=Gtk.ButtonsType.OK,
+            text=message,
+        )
+        dialog.run()
+        dialog.destroy()
+        
+    def show_error_message(self, message):
+        "Show a error message to the user"
+        dialog = Gtk.MessageDialog(
+            transient_for=self.main_window if self.main_window else None,
+            flags=0,
+            message_type=Gtk.MessageType.ERROR,
+            buttons=Gtk.ButtonsType.OK,
+            text="Error",
+        )
+        dialog.format_secondary_text(message)  # Add detailed error message
+
+        # Run the dialog and wait for user response
+        response = dialog.run()
+
+        # Destroy the dialog after the user responds
+        dialog.destroy()
 
     def show_critical_error(self, message):
         """
@@ -106,35 +138,32 @@ class MyApp(Gtk.Application):
 
 
     def on_config_saved(self, file_path, port_name):
-        self.file_path = file_path
-        self.port_name = port_name
-        self.print_()  # FOR DEVELOPMENT PURPOSES
-        return self.dummy_instance.initialize(file_path, port_name)
-    
-    # FOR DEVELOPMENT PURPOSES
-    def print_(self):
-        print(self.file_path)
-        print(self.port_name)
+        status = self.dummy_instance.initialize(file_path, port_name)
+        if status[0] == False:
+            error_message = status[1]
+            GLib.idle_add(self.show_error_message, error_message)
+            return False # Return false, so user can enter a valid filepath
+        else:
+            self.data["user-settings"]["x"]["file_path"] = file_path
+            self.data["user-settings"]["x"]["default_port"] = port_name
 
-    def get_ports(self):
-        # Run the xrandr command and capture the output
-        result = subprocess.run(['xrandr'], stdout=subprocess.PIPE, text=True)
-        output = result.stdout
-
-        # Extract valid port names (lines that start with a port name)
-        ports = []
-        for line in output.splitlines():
-            if " connected" in line or " disconnected" in line:
-                if "eDP" in line:
-                    continue
-                port = line.split()[0]  # The first word is the port name
-                ports.append(port)
-        
-        return ports 
+            # Write the new json file 
+            return self.save_user_settings()
+            
     
-    # def on_config_saved(self, file_path, port_name):
-    #     # This function will be called when the "Save" button is clicked
-    #     print(f"File Path from app.py: {file_path}")
-    #     print(f"Port Name from app.py: {port_name}")
+    def save_user_settings(self): # By writing into config.json file 
+        try:
+            with open("src/config.json", 'w') as json_file:
+                json.dump(self.data, json_file, indent=4)  # indent=4 for pretty-printing
+                return True
+        except Exception as e:
+            self.main_window.show_error_dialog(str(e))
+            return False
+
+    # FOR DEVELOPMENT 
+    def print_dummy_variables(self):
+        print("Portname is " + self.dummy_instance.port_name)
+        print("Filepathh is " + self.dummy_instance.file_path)
+        print("The status is  " + self.dummy_instance.check_status())
 
 
