@@ -24,14 +24,23 @@ class MyApp(Gtk.Application):
         
 
     def do_activate(self):
-        self.initialize_app()
+        if self.initialize_app() == False:
+            return
         
         self.main_window = MainWindow(self)
         self.add_window(self.main_window)
         self.main_window.show_all()
 
+    # LOGIC FUNCTIONS
 
     def initialize_app(self):
+        
+        # First check the session type 
+        session = self.get_session_type()
+        if session != "Xorg":
+            self.show_critical_error(f"You are on {session} session\nThis app only works on Xorg")
+            return False
+
         # Read the configuration from config.json
         self.load_data()
 
@@ -68,6 +77,16 @@ class MyApp(Gtk.Application):
         self.save_user_settings()
         
         return self.initialize_app()
+
+    def get_session_type(self):
+        if os.getenv('WAYLAND_DISPLAY'):
+            return 'Wayland'
+        elif os.getenv('DISPLAY'):
+            return 'Xorg'
+        else:
+            return 'Unknown'
+
+    # UI FUNCTIONS
 
     def show_info_dialog(self, message):
         dialog = Gtk.MessageDialog(
