@@ -33,7 +33,8 @@ class BoxUpper:
         box.pack_start(label_title, True, True, 10)
 
         # Status
-        label_status = Gtk.Label(label="Ready")
+        status = self.app.dummy_instance.status
+        label_status = Gtk.Label(label=status)
         box.pack_start(label_status, True, True, 10)
 
         # Buttons
@@ -53,8 +54,7 @@ class BoxUpper:
         config_window.show_all()
 
     def on_enable_clicked(self, button):
-        # Handle save logic
-        print("Save button clicked")
+        self.app.dummy_instance.activate_dummy_config()
 
 
     def create_display_settings_box(self):

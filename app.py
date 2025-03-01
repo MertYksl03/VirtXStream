@@ -67,7 +67,6 @@ class MyApp(Gtk.Application):
             GLib.idle_add(self.show_critical_error, error_message)
             return  # Stop further execution
         
-
         # if initialize is succesfull then return true
         return True
     

@@ -22,7 +22,6 @@ class Dummy:
         self.file_path = file_path
         self.port_name = port_name
         self.ports = self.get_ports()
-        self.status = self.check_status()
 
         # Read the files 
         self.__nvidia_conf = FileManager.read_file(file_path + "10-nvidia.conf")
@@ -39,6 +38,8 @@ class Dummy:
 
         # Check the dummmy is activated if it is then is_dummy_acitaved = True
         self.is_dummy_activated = self.check_dummy_activated()
+
+        self.status = self.check_status()
 
         # If everything is ok then return True, meaning the initialize is succesfull
         return True, " "
@@ -62,13 +63,19 @@ class Dummy:
         for line in output.splitlines():
             if " connected " in line and self.port_name in line: 
                 is_port_shown_connected = True
+        is_dummy_activated = self.check_dummy_activated()
 
-        if self.check_dummy_activated() and is_port_shown_connected:
-            return "Acitaved"
-        elif (self.check_dummy_activated() and not is_port_shown_connected) or (not self.check_dummy_activated() and is_port_shown_connected):
+        if is_dummy_activated and is_port_shown_connected:
+            return "Activated"
+        elif is_dummy_activated and not is_port_shown_connected:
+            return "Reboot required"
+        elif not is_dummy_activated and is_port_shown_connected:
             return "Reboot required"
         else:
             return "Disabled"
+        
+    def update_status(self):
+        self.status = self.check_status()
 
     # These two functions return the status of the operation and error or succes message. 
     # index 0 is status 
@@ -76,15 +83,20 @@ class Dummy:
 
     def activate_dummy_config(self):
         config_file_name = "10-dummy.conf"
+
         # Dont do a thing if the dummy is already activated
         if self.check_dummy_activated():
-            return False, "Dummy is already acitavated"
+            self.update_status()    # I know this is a stupid idea, but I can't come up with another one.
+            return False, "Dummy is already activated"
         
         # Create, write the dummy-config and check its content
-        if FileManager.write_file(self.file_path + config_file_name, self.__dummy_data) and self.check_dummy_activated():
+        if FileManager.write_file(self.file_path + config_file_name, self.__dummy_data) == True and self.check_dummy_activated() == True:
+            self.update_status()
             return True, "Dummy config activated"
-        else :
+        else:
+            self.update_status()
             return False, "Couldn't create a dummy config"
+        
 
     # This function deletes the dummy config
     def deactive_dummy_config(self):
@@ -92,13 +104,16 @@ class Dummy:
 
         # Check if the config is already deleted
         if not FileManager.is_file_existed(file_path):
+            self.update_status()
             return False, "Dummy is already disabled"
         else:
             # Delete the file
             try: 
                 os.remove(file_path)
+                self.update_status()
                 return True, "Dummy config deleted succesfully"
             except:
+                self.update_status()
                 return False, "Couldn't delete the dummy config"
 
     def get_ports(self):
