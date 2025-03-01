@@ -49,7 +49,7 @@ class BoxUpper:
 
     def on_configure_clicked(self, button):
         # Open the configuration window
-        config_window = ConfigWindow(self.app.on_config_saved, self.app.dummy_instance.ports, self.parent_window, "dummy")
+        config_window = ConfigWindow(self.app, self.parent_window, "dummy")
         config_window.show_all()
 
     def on_enable_clicked(self, button):
