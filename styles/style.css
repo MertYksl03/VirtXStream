@@ -10,10 +10,19 @@
     background-color: rgb(38, 43, 54);
 }
 
+#button-enable {
+    background-color: green;
+    color: white;
+}
+
+#button-disable {
+    background-color: red;
+    color: black;
+}
+
 #upper_box_boxes button {
     min-height: 40px;
     border-radius: 40px;
-    background-color: black;
 }
 
 

@@ -7,9 +7,10 @@ from utils.file_manager import FileManager
 class Dummy:
     # Global variables
     file_path = None        # Holds the file path of Xorg config files
-    port_name = None        # Holds the name of the display port 
+    port_name = None        # Holds the name of the display port (virtual display)
     status = None           # Holds the status 
     ports = None            # Holds all the ports the computer has for display
+    main_port = None        # Holds the name of the main display port 
 
     def __init__(self):
         # Private variables
@@ -22,6 +23,7 @@ class Dummy:
         self.file_path = file_path
         self.port_name = port_name
         self.ports = self.get_ports()
+        self.main_port = self.get_main_port()
 
         # Read the files 
         self.__nvidia_conf = FileManager.read_file(file_path + "10-nvidia.conf")
@@ -99,7 +101,7 @@ class Dummy:
         
 
     # This function deletes the dummy config
-    def deactive_dummy_config(self):
+    def deactivate_dummy_config(self):
         file_path =  self.file_path + "10-dummy.conf"
 
         # Check if the config is already deleted
@@ -132,6 +134,24 @@ class Dummy:
         
         return ports 
     
+    # Should use different logic or merge get_ports and get_main_port functions 
+    # DEFINITELY NEED TO REMOVE THIS FUNCTION
+    def get_main_port(self):
+        # Run the xrandr command and capture the output
+        result = subprocess.run(['xrandr'], stdout=subprocess.PIPE, text=True)
+        output = result.stdout
+
+        main_port = None
+    
+        # Extract the valid main port 
+        for line in output.splitlines():
+            if " connected " in line and " primary " in line:
+                main_port = line.split()[0] # The first word is the port name 
+            
+
+        return main_port
+
+
     # FOR DEVELOPMENT
     def print_variables(self):
         print("Portname is " + self.port_name)

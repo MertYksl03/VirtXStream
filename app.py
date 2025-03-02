@@ -15,6 +15,8 @@ import subprocess
 class MyApp(Gtk.Application):
     # Global variables
     dummy_instance = None
+    port_name = None
+    main_port_name = None
 
     def __init__(self):
         super().__init__(application_id="org.gnome.X-Vnc")  # Add an application ID
@@ -66,6 +68,8 @@ class MyApp(Gtk.Application):
             error_message = status[1]
             GLib.idle_add(self.show_critical_error, error_message)
             return  # Stop further execution
+        
+        self.main_port_name = self.dummy_instance.main_port
         
         # if initialize is succesfull then return true
         return True

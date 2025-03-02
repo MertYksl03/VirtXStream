@@ -1,10 +1,11 @@
 import gi
 
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk, Gdk #type: ignore
+from gi.repository import Gtk, Gdk, GLib  #type: ignore
 
 from gui.configure_window import ConfigWindow
 
+# THE WIDGETS THAT UPDATES, THEIR REFERANCE MUST BE GLOBAL 
 
 class BoxUpper:
 
@@ -33,29 +34,50 @@ class BoxUpper:
         box.pack_start(label_title, True, True, 10)
 
         # Status
-        status = self.app.dummy_instance.status
-        label_status = Gtk.Label(label=status)
-        box.pack_start(label_status, True, True, 10)
+        self.label_status = Gtk.Label(label=self.app.dummy_instance.status)  # Store reference
+        box.pack_start(self.label_status, True, True, 10)
 
         # Buttons
         button_configure = Gtk.Button(label="Configure")
         button_configure.connect("clicked", self.on_configure_clicked)
         box.pack_start(button_configure, False, False, 10)
 
-        button_save = Gtk.Button(label="Enable")
-        button_save.connect("clicked", self.on_enable_clicked)
-        box.pack_start(button_save, False, False, 10)
+        self.button_toggle_dummy = Gtk.Button(label="Enable")
+        self.button_toggle_dummy.connect("clicked", self.on_toggle_clicked)
+        self.button_toggle_dummy.set_name("button-enable")
+        box.pack_start(self.button_toggle_dummy, False, False, 10)
 
+        self.update_config_box()
         return box
 
     def on_configure_clicked(self, button):
         # Open the configuration window
         config_window = ConfigWindow(self.app, self.parent_window, "dummy")
         config_window.show_all()
+        self.update_config_box()
 
-    def on_enable_clicked(self, button):
-        self.app.dummy_instance.activate_dummy_config()
+    def on_toggle_clicked(self, button):
+        if self.button_toggle_dummy.get_label() == "Enable":
+            self.app.dummy_instance.activate_dummy_config()
+        else:
+            self.app.dummy_instance.deactivate_dummy_config()
+        self.update_config_box()
 
+    # This function updates the ui elements
+    def update_config_box(self):
+        new_status = self.app.dummy_instance.status
+        
+        # Update status label
+        GLib.idle_add(self.label_status.set_text, new_status)  
+
+        # Enable/Disable the button based on status
+        if new_status == "Activated":
+            GLib.idle_add(self.button_toggle_dummy.set_label, "Disable")  # Change button text
+            GLib.idle_add(self.button_toggle_dummy.set_name, "button-disable")  # Change button apperance
+            
+        else:
+            GLib.idle_add(self.button_toggle_dummy.set_label, "Enable")  # Change button text
+            GLib.idle_add(self.button_toggle_dummy.set_name, "button-enable")  # Change button apperance
 
     def create_display_settings_box(self):
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
