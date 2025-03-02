@@ -22,7 +22,6 @@ class MainWindow(Gtk.ApplicationWindow):
         self.set_border_width(10)
         self.set_name("main-window") # name for css
         self.app = app
-        
         # With holding the refarance to the dummy_instance all windows have the information about the dummy config(filepath, ports, portname etc.)
         self.dummy_instance = app.dummy_instance
 
@@ -66,7 +65,7 @@ class MainWindow(Gtk.ApplicationWindow):
 
         box_lower = BoxLower().get_box()
         box_outer.pack_start(box_lower, True, True, 0)
-        
+
 
     def on_restore_clicked(self, button):
         if self.app.restore_defaults() == True:

@@ -1,16 +1,26 @@
-import os 
 import subprocess
-import time 
+import shutil
 
 class VirtualDisplay:
-    def __init__(self, app):
-        self.app = app                               # The referance to app object 
-        self.main_port_name = self.app.main_port     # The port that main display is connected to
-        self.port_name = self.app.port_name          # The port that virtaul display is "connected" to
+    # Global variables
+    status = None
 
+    def __init__(self, port_name):
+        # self.app = app                               # The referance to app object 
+        # # self.main_port_name = self.app.main_port     # The port that main display is connected to
+        # # self.port_name = self.app.port_name          # The port that virtaul display is "connected" to
+        self.port_name = port_name
+        self.status = False
 
     def plug_virtual_display(self, width, height, main_port_name, position, port_name):
-        
+
+        # Check for dependencies
+        if not shutil.which("cvt"):
+            return False, "cvt program not found"
+        if not shutil.which("xrandr"):
+            return False, "xrandr not found"
+
+
         # Create a mode with cvt program 
         mode_creation_program = "cvt"
         resolution = self.create_mode(mode_creation_program, width, height) 
@@ -20,26 +30,36 @@ class VirtualDisplay:
         if resolution == False:
             return False, "Couldn't create a mode"
         
-        print (resolution)
 
-        # Create new mode to xrandr 
         create_command = f"xrandr --newmode {resolution[0]}"
-        subprocess.run(create_command.split())
-
-        # Add new mode to xrandr
         add_command = f"xrandr --addmode {port_name} {resolution[1]}" # this command requires mode name with quotes
-        subprocess.run(add_command.split())
-
-        # Plug the new mode 
         plug_command = f"xrandr --output {port_name} --{position} {main_port_name} --mode {resolution[2]}" # this command requires mode name without quotes
-        subprocess.run(plug_command.split())
+
+        try :
+            # Create new mode to xrandr 
+            subprocess.run(create_command.split(), check=True)
+            # Add new mode to xrandr
+            subprocess.run(add_command.split(), check=True)
+            # Plug the new mode 
+            subprocess.run(plug_command.split(), check=True)
+        except subprocess.CalledProcessError as e:
+            return False, f"Failed to configure display: {e}"
+
+        self.status = True
+        return True, "Display configured succesfully"
 
 
 
     def unplug_virtual_display(self):
-        # Unlug the virtaul display (does not render)
-        unplug_command = f"xrandr --output {self.port_name} --off"
-        subprocess.run(unplug_command.split())
+        try:
+            # Unlug the virtaul display (does not render)
+            unplug_command = f"xrandr --output {self.port_name} --off"
+            subprocess.run(unplug_command.split(), check=True)
+        except subprocess.CalledProcessError as e:
+            return False, f"Failed to disconnect virtual display {e}"
+
+        self.status = False
+        return True, "Virtual display is disconnected"
 
     def create_mode(self, program, width ,height):
         mode_process = None

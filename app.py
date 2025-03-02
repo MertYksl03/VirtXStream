@@ -1,4 +1,7 @@
 import gi
+import atexit
+import signal
+import sys
 
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, GLib  # type: ignore
@@ -6,6 +9,7 @@ from gi.repository import Gtk, GLib  # type: ignore
 from gui.main_window import MainWindow
 
 from src.dummy import Dummy
+from src.virtual_display import VirtualDisplay
 
 import threading
 import json
@@ -29,6 +33,13 @@ class MyApp(Gtk.Application):
         if self.initialize_app() == False:
             return
         
+            # Register cleanup function for normal exit
+        atexit.register(self.clean_up)
+
+        # Register signal handlers for crashes or termination
+        # signal.signal(signal.SIGTERM, self.handle_signal)
+        # signal.signal(signal.SIGINT, self.handle_signal)
+
         self.main_window = MainWindow(self)
         self.add_window(self.main_window)
         self.main_window.show_all()
@@ -70,6 +81,8 @@ class MyApp(Gtk.Application):
             return  # Stop further execution
         
         self.main_port_name = self.dummy_instance.main_port
+
+        self.virtual_display_instance = VirtualDisplay(self.port_name)
         
         # if initialize is succesfull then return true
         return True
@@ -88,6 +101,21 @@ class MyApp(Gtk.Application):
             return 'Xorg'
         else:
             return 'Unknown'
+
+    def clean_up(self):
+        print("Cleaning up")
+        # This function will be called when the program closes or crahes
+        
+        # Check the virtual display is connected or not
+        if self.virtual_display_instance.status == True:
+            # Unlug the virtual display
+            self.virtual_display_instance.unplug_virtual_display()
+
+        super().do_shutdown(self) # Call the parent class's shutdown method
+
+    def handle_signal(self, signum, frame):
+        self.clean_up()
+        sys.exit(0)
 
     # UI FUNCTIONS
 
