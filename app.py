@@ -119,7 +119,7 @@ class MyApp(Gtk.Application):
 
     # UI FUNCTIONS
 
-    def show_info_dialog(self, message):
+    def show_info_message(self, message):
         dialog = Gtk.MessageDialog(
             transient_for=self.main_window if self.main_window else None,
             flags=0,

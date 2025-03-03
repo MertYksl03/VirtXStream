@@ -58,9 +58,29 @@ class BoxUpper:
 
     def on_toggle_clicked(self, button):
         if self.button_toggle_dummy.get_label() == "Enable":
-            self.app.dummy_instance.activate_dummy_config()
+            status = self.app.dummy_instance.activate_dummy_config() 
+
+            if status == None:
+                self.app.show_error_message("Failed to enable dummy config \nRun the program with sudo")
+                return
+            
+            if status[0] == True:
+                self.app.show_info_message(status[1])
+            elif status[0] == False:
+                self.app.show_error_message(status[1])
         else:
-            self.app.dummy_instance.deactivate_dummy_config()
+
+            status = self.app.dummy_instance.deactivate_dummy_config()
+
+            if status == None:
+                self.app.show_error_message("Failed to disable dummy config \nRun the program with sudo")
+                return
+
+            if status[0] == True:
+                self.app.show_info_message(status[1])
+            elif status[0] == False:
+                self.app.show_error_message(status[1])
+
         self.update_config_box()
 
     # This function updates the ui elements
