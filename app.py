@@ -103,7 +103,6 @@ class MyApp(Gtk.Application):
             return 'Unknown'
 
     def clean_up(self):
-        print("Cleaning up")
         # This function will be called when the program closes or crahes
         
         # Check the virtual display is connected or not
@@ -139,7 +138,7 @@ class MyApp(Gtk.Application):
             buttons=Gtk.ButtonsType.OK,
             text="Error",
         )
-        dialog.format_secondary_text(message)  # Add detailed error message
+        dialog.format_secondary_text(message)
 
         # Run the dialog and wait for user response
         response = dialog.run()
