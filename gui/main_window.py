@@ -22,7 +22,7 @@ class MainWindow(Gtk.ApplicationWindow):
         self.set_border_width(10)
         self.set_name("main-window") # name for css
         self.app = app
-        # With holding the refarance to the dummy_instance all windows have the information about the dummy config(filepath, ports, portname etc.)
+        # Hold the referance to the dummy_instance object
         self.dummy_instance = app.dummy_instance
 
         # Load external CSS
