@@ -187,7 +187,7 @@ class MyApp(Gtk.Application):
             self.data = {}  # Fallback to an empty dictionary
 
 
-    def on_config_saved(self, file_path, port_name):
+    def on_config_saved_dmy(self, file_path, port_name):
         status = self.dummy_instance.initialize(file_path, port_name)
         if status[0] == False:
             error_message = status[1]
@@ -200,6 +200,12 @@ class MyApp(Gtk.Application):
             # Write the new json file 
             return self.save_user_settings()
             
+    def on_config_save_vd(self, width ,height, position):
+        # Assign the width, height and position
+        self.virtual_display_instance.width = width
+        self.virtual_display_instance.height = height
+        self.virtual_display_instance.position = position
+        
     
     def save_user_settings(self): # By writing into config.json file 
         try:

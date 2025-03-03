@@ -5,6 +5,9 @@ class VirtualDisplay:
     # Global variables
     status = None
     active_resolution = None
+    width = None
+    height = None
+    position = None
 
     def __init__(self, port_name):
         # self.app = app                               # The referance to app object 
@@ -13,18 +16,23 @@ class VirtualDisplay:
         self.port_name = port_name
         self.status = False
 
-    def plug_virtual_display(self, width, height, main_port_name, position, port_name):
+    def plug_virtual_display(self,main_port_name,port_name):
 
         # Check for dependencies
         if not shutil.which("cvt"):
             return False, "cvt program not found"
         if not shutil.which("xrandr"):
             return False, "xrandr not found"
+        
+        # Check if the width or height or position are configured
+        if self.width == None or self.height == None or self.position == None:
+            # This should be changed. Not descriptive enough
+            return False, "Virtual display did not configured"
 
 
         # Create a mode with cvt program 
         mode_creation_program = "cvt"
-        resolution = self.create_mode(mode_creation_program, width, height, 60) # refresh rate is hardcoed as 60 
+        resolution = self.create_mode(mode_creation_program, self.width, self.height, 60) # refresh rate is hardcoed as 60 
         # resolution[0] = modeline, resolution[1] = mode name with quotes, resolution[2] = mode name without quotes
 
         # Check if creating mode is succesfull or not 
@@ -34,7 +42,7 @@ class VirtualDisplay:
 
         create_command = f"xrandr --newmode {resolution[0]}"
         add_command = f"xrandr --addmode {port_name} {resolution[1]}" # this command requires mode name with quotes
-        plug_command = f"xrandr --output {port_name} --{position} {main_port_name} --mode {resolution[2]}" # this command requires mode name without quotes
+        plug_command = f"xrandr --output {port_name} --{self.position} {main_port_name} --mode {resolution[2]}" # this command requires mode name without quotes
 
         try :
             # Create new mode to xrandr 

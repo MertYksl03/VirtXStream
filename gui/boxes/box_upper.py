@@ -16,11 +16,6 @@ class BoxUpper:
         self.box_upper = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         self.parent_window = parent_window
         
-        # Stuff about virtual display 
-        self.width = 1280
-        self.height = 800
-        self.position = "right-of"
-        
         # Create and add sub-boxes
         self.box_upper.pack_start(self.create_config_box(), True, True, 10)
         self.box_upper.pack_start(self.create_display_settings_box(), True, True, 10)
@@ -120,6 +115,7 @@ class BoxUpper:
         box.pack_start(self.label_status_vd, True, True, 10)
 
         button_configure = Gtk.Button(label="Configure")
+        button_configure.connect("clicked", self.on_config_clicked_vd)
         box.pack_start(button_configure, False, False, 10)
 
         self.button_toggle_vd = Gtk.Button()
@@ -131,6 +127,10 @@ class BoxUpper:
         return box
 
     def on_config_clicked_vd(self, button):
+        # If the virtual display is enabled, dont let the user to configure it 
+        if self.vd_instance.status == True:
+            self.app.show_error_message("To configure the virtual display you have to disable it")
+            return
         # Open the configuration window
         config_window = ConfigWindow(self.app, self.parent_window, 1)
         config_window.show_all()
@@ -139,16 +139,10 @@ class BoxUpper:
     def on_apply_clicked_vd(self, button):
         status = None
 
-        # Check if the width or height or position are configured
-        if self.width == None or self.height == None or self.position == None:
-            # This should be changed. Not descriptive enough
-            self.app.show_error_message("Virtual display did not configured")
-            return
-
         # Check the virtual-display status
         if self.button_toggle_vd.get_label() == "Enable":
             # Plug the virtual display
-            status = self.vd_instance.plug_virtual_display(self.width, self.height, self.app.main_port_name , self.position, self.app.port_name)
+            status = self.vd_instance.plug_virtual_display(self.app.main_port_name, self.app.port_name)
         else:
             # Unplug the virtual display 
             status = self.vd_instance.unplug_virtual_display()

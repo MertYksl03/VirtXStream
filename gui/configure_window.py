@@ -15,6 +15,9 @@ class ConfigWindow(Gtk.Window):
         # Store referance to app object
         self.app = app
 
+        # Initialize vd_position and set it to left for default
+        self.vd_position = "left-of"
+
         header_bar = Gtk.HeaderBar()
         header_bar.set_show_close_button(False)  # Hide the close button
         self.set_titlebar(header_bar)  # Set the header bar as the window's title bar
@@ -26,6 +29,9 @@ class ConfigWindow(Gtk.Window):
         if which_config == 0:
             Gtk.Window.set_title(self, "Dummy Config Settings")
             self.add(self.create_window_dummy_config())
+        elif which_config == 1:
+            Gtk.Window.set_title(self, "Virtual Display Settings")
+            self.add(self.create_window_vd_config())
 
     def create_window_dummy_config(self):
         # Create a grid to arrange widgets
@@ -59,7 +65,7 @@ class ConfigWindow(Gtk.Window):
 
         # Save button
         button_save = Gtk.Button(label="Save")
-        button_save.connect("clicked", self.on_save_clicked) # Call the function on_config_saved from app object
+        button_save.connect("clicked", self.on_save_clicked_dmy) # Call the function on_config_saved from app object
         grid.attach(button_save, 1, 4, 1, 1)
 
         # Close button
@@ -72,7 +78,7 @@ class ConfigWindow(Gtk.Window):
     def on_close_clicked(self, widget):
         self.destroy()
 
-    def on_save_clicked(self, widget):
+    def on_save_clicked_dmy(self, widget):
 
         file_path = self.file_path_entry.get_text().strip()
         port_name = self.port_name_entry.get_text().strip()
@@ -95,12 +101,98 @@ class ConfigWindow(Gtk.Window):
 
 
         # Call the callback funtion with enterd values
-        if self.app.on_config_saved:
-            if self.app.on_config_saved(file_path, port_name) == True:
+        if self.app.on_config_saved_dmy:
+            if self.app.on_config_saved_dmy(file_path, port_name) == True:
                 # Close the configuration window
                 self.destroy()
     
 
+    def create_window_vd_config(self):
+       # Create a grid to arrange widgets
+        grid = Gtk.Grid()
+        grid.set_column_spacing(10)
+        grid.set_row_spacing(10)
+
+        # Can add a info: all the widget's relative height attributes are aligned 
+
+        # Width entry
+        grid.attach(Gtk.Label(label="Width:"), 0, 1, 1, 1)
+        self.width_entry = Gtk.Entry()
+        self.width_entry.set_placeholder_text("Current width: " + str(self.app.virtual_display_instance.width))
+        grid.attach(self.width_entry, 1, 1, 3, 1)  # Span across 3 columns
+
+        # Height entry
+        grid.attach(Gtk.Label(label="Height:"), 0, 2, 1, 1)
+        self.height_entry = Gtk.Entry()
+        self.height_entry.set_placeholder_text("Current height: " + str(self.app.virtual_display_instance.height))
+        grid.attach(self.height_entry, 1, 2, 3, 1)  # Span across 3 columns
+
+        info_position_string = "Select the position for virtual display"
+        info_position = Gtk.Label()
+        info_position.set_label(info_position_string)
+        grid.attach(info_position, 0, 3, 4, 1)  # Span across 4 columns
+
+        # Buttons for position
+        # Create a radio button group
+        button_left = Gtk.RadioButton.new_with_label(None, "Left")
+        button_left.connect("toggled", self.on_position_buttons_toggled_vd, "left-of")
+        grid.attach(button_left, 0, 4, 1, 1)  # Column 0, Row 3
+
+        button_below = Gtk.RadioButton.new_with_label_from_widget(button_left, "Below")
+        button_below.connect("toggled", self.on_position_buttons_toggled_vd, "below")
+        grid.attach(button_below, 1, 4, 1, 1)  # Column 1, Row 3
+
+        button_above = Gtk.RadioButton.new_with_label_from_widget(button_left, "Above")
+        button_above.connect("toggled", self.on_position_buttons_toggled_vd, "above")
+        grid.attach(button_above, 2, 4, 1, 1)  # Column 2, Row 3
+
+        button_right = Gtk.RadioButton.new_with_label_from_widget(button_left, "Right")
+        button_right.connect("toggled", self.on_position_buttons_toggled_vd, "right-of")
+        grid.attach(button_right, 3, 4, 1, 1)  # Column 3, Row 3
+
+        # Save button
+        button_save = Gtk.Button(label="Save")
+        button_save.connect("clicked", self.on_save_clicked_vd)
+        grid.attach(button_save, 2, 5, 2, 2)  # Span across 2 columns, Row 4
+
+        # Close button
+        button_close = Gtk.Button(label="Close")
+        button_close.connect("clicked", self.on_close_clicked)
+        grid.attach(button_close, 0, 5, 2, 2)  # Span across 2 columns, Row 4
+
+        return grid
+
+    def on_position_buttons_toggled_vd(self, button, name):
+        if button.get_active():
+            self.vd_position = name
+
+    def on_save_clicked_vd(self, button):
+        width = self.width_entry.get_text().strip()
+        height = self.height_entry.get_text().strip()
+        position = self.vd_position
+
+        # First check if the entries are not empty
+        if not width or not height: 
+            # show an error dialog to user
+            self.show_error_dialog("Both fields are required\nYou need to fill the both fields")
+            return 
+        
+        # Check if the entries are integers
+        try:
+            width = int (width)
+            height = int (height)
+        except Exception:
+            self.show_error_dialog("Please enter numbers")
+            return
+        
+        # Not a perfect way to check it. Should be changed
+        if width < 0 or width > 2000 or height < 0 or height > 2000:
+            self.show_error_message("Please enter a valid resolution")
+            return
+        
+        self.app.on_config_save_vd(width ,height, position)
+        self.destroy()
+        
     def show_error_dialog(self, message):
         dialog = Gtk.MessageDialog(
             parent=self,
