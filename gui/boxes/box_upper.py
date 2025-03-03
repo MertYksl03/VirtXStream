@@ -11,6 +11,8 @@ class BoxUpper:
 
     def __init__(self, app, parent_window):
         self.app = app
+        self.dummy_instance = self.app.dummy_istance
+        self.vd_instance = self.app.virtual_display_instance
         self.box_upper = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         self.parent_window = parent_window
         # Create and add sub-boxes
@@ -34,12 +36,12 @@ class BoxUpper:
         box.pack_start(label_title, True, True, 10)
 
         # Status
-        self.label_status = Gtk.Label(label=self.app.dummy_instance.status)  # Store reference
+        self.label_status = Gtk.Label(label=self.dummy_instance.status)
         box.pack_start(self.label_status, True, True, 10)
 
         # Buttons
         button_configure = Gtk.Button(label="Configure")
-        button_configure.connect("clicked", self.on_configure_clicked)
+        button_configure.connect("clicked", self.on_configure_clicked_dummy)
         box.pack_start(button_configure, False, False, 10)
 
         self.button_toggle_dummy = Gtk.Button(label="Enable")
@@ -50,15 +52,15 @@ class BoxUpper:
         self.update_config_box()
         return box
 
-    def on_configure_clicked(self, button):
+    def on_configure_clicked_dummy(self, button):
         # Open the configuration window
-        config_window = ConfigWindow(self.app, self.parent_window, "dummy")
+        config_window = ConfigWindow(self.app, self.parent_window, 0)
         config_window.show_all()
         self.update_config_box()
 
     def on_toggle_clicked(self, button):
         if self.button_toggle_dummy.get_label() == "Enable":
-            status = self.app.dummy_instance.activate_dummy_config() 
+            status = self.dummy_instance.activate_dummy_config() 
 
             if status == None:
                 self.app.show_error_message("Failed to enable dummy config \nRun the program with sudo")
@@ -70,7 +72,7 @@ class BoxUpper:
                 self.app.show_error_message(status[1])
         else:
 
-            status = self.app.dummy_instance.deactivate_dummy_config()
+            status = self.dummy_instance.deactivate_dummy_config()
 
             if status == None:
                 self.app.show_error_message("Failed to disable dummy config \nRun the program with sudo")
@@ -85,7 +87,7 @@ class BoxUpper:
 
     # This function updates the ui elements
     def update_config_box(self):
-        new_status = self.app.dummy_instance.status
+        new_status = self.dummy_instance.status
         
         # Update status label
         GLib.idle_add(self.label_status.set_text, new_status)  
@@ -99,6 +101,7 @@ class BoxUpper:
             GLib.idle_add(self.button_toggle_dummy.set_label, "Enable")  # Change button text
             GLib.idle_add(self.button_toggle_dummy.set_name, "button-enable")  # Change button apperance
 
+    # This box shows the info about the virtual display and lets the user to configure it
     def create_display_settings_box(self):
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         box.set_name("upper_box_boxes")
@@ -116,6 +119,17 @@ class BoxUpper:
         button_apply = Gtk.Button(label="Apply")
         box.pack_start(button_apply, False, False, 10)
         return box
+
+    def on_config_clicked_vd(self, button):
+        # Open the configuration window
+        config_window = ConfigWindow(self.app, self.parent_window, 1)
+        config_window.show_all()
+        self.update_config_box()
+
+    def on_apply_clicked_vd(self, button):
+        # Check the virtual-display status
+        if self.app.virtual_display_instance.status == True:
+            self.app.virtaul_display_instance
 
 
     def create_adb_settings_box(self):

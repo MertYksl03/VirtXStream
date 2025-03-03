@@ -18,6 +18,7 @@ import subprocess
 
 class MyApp(Gtk.Application):
     # Global variables
+    virtual_display_instance = None
     dummy_instance = None
     port_name = None
     main_port_name = None

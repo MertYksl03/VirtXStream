@@ -22,7 +22,8 @@ class ConfigWindow(Gtk.Window):
 
 
         # Handle which configure window will be shown
-        if which_config == "dummy":
+        # 0 = dummy, 1 = virtual-display, 2 = adb-server, 3 = Vnc-server
+        if which_config == 0:
             Gtk.Window.set_title(self, "Dummy Config Settings")
             self.add(self.create_window_dummy_config())
 

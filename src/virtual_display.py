@@ -7,8 +7,8 @@ class VirtualDisplay:
 
     def __init__(self, port_name):
         # self.app = app                               # The referance to app object 
-        # # self.main_port_name = self.app.main_port     # The port that main display is connected to
-        # # self.port_name = self.app.port_name          # The port that virtaul display is "connected" to
+        # self.main_port_name = self.app.main_port     # The port that main display is connected to
+        # self.port_name = self.app.port_name          # The port that virtaul display is "connected" to
         self.port_name = port_name
         self.status = False
 
