@@ -69,7 +69,7 @@ class MainWindow(Gtk.ApplicationWindow):
 
     def on_restore_clicked(self, button):
         if self.app.restore_defaults() == True:
-            self.app.show_info_dialog("Restoring to default is succesful")
+            self.app.show_info_message("Restoring to default is succesful")
 
 
     def show_error_dialog(self, message):

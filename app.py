@@ -61,11 +61,6 @@ class MyApp(Gtk.Application):
         # These variables will be loaded from config.json
         try :
             self.file_path = self.data["user-settings"]["x"]["file_path"]
-        except Exception as e:
-            self.show_critical_error(str(e))
-            return
-
-        try :
             self.port_name = self.data["user-settings"]["x"]["default_port"]
         except Exception as e:
             self.show_critical_error(str(e))
@@ -84,6 +79,14 @@ class MyApp(Gtk.Application):
         self.main_port_name = self.dummy_instance.main_port
 
         self.virtual_display_instance = VirtualDisplay(self.port_name)
+        # Initiliaze the vd with data from config.json
+        try :
+            self.virtual_display_instance.width = self.data["user-settings"]["virtual-display"]["width"]
+            self.virtual_display_instance.height = self.data["user-settings"]["virtual-display"]["height"]
+            self.virtual_display_instance.position = self.data["user-settings"]["virtual-display"]["position"]
+        except Exception as e:
+            self.show_critical_error(str(e))
+            return
         
         # if initialize is succesfull then return true
         return True
@@ -205,7 +208,13 @@ class MyApp(Gtk.Application):
         self.virtual_display_instance.width = width
         self.virtual_display_instance.height = height
         self.virtual_display_instance.position = position
+
+        # save the configuration to json file
+        self.data["user-setting"]["virtual-display"]["width"] = width
+        self.data["user-setting"]["virtual-display"]["height"] = height
+        self.data["user-setting"]["virtual-display"]["position"] = position
         
+        self.save_user_settings()
     
     def save_user_settings(self): # By writing into config.json file 
         try:

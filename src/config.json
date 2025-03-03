@@ -4,6 +4,11 @@
             "file_path": "testfiles/",
             "default_port": "HDMI-1-0"
         },
+        "virtual-display": {
+            "width": "1280",
+            "height": "800",
+            "position": "right-of"
+        },
         "Vnc": {
             "default_port": "5900"
         }
@@ -12,6 +17,11 @@
         "x": {
             "file_path": "testfiles/",
             "default_port": "HDMI-1-0"
+        },
+        "virtual-display": {
+            "width": "1280",
+            "height": "800",
+            "position": "right-of"
         },
         "Vnc": {
             "default_port": "5900"
