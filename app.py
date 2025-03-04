@@ -18,10 +18,14 @@ import subprocess
 
 class MyApp(Gtk.Application):
     # Global variables
-    virtual_display_instance = None
+    ports = []                                              # Holds all the ports the computer has for display 
+    port_name = None                                        # Holds the name of the display port of virtual display
+    main_port_name = None                                   # Holds the name of the primary display port 
+    resolutions = None                                      # All the resolution of the port that vd is connected to
+    active_resoultion_vnc = None                            # 
+
     dummy_instance = None
-    port_name = None
-    main_port_name = None
+    virtual_display_instance = None
 
     def __init__(self):
         super().__init__(application_id="org.gnome.X-Vnc")  # Add an application ID
@@ -38,8 +42,8 @@ class MyApp(Gtk.Application):
         atexit.register(self.clean_up)
 
         # Register signal handlers for crashes or termination
-        # signal.signal(signal.SIGTERM, self.handle_signal)
-        # signal.signal(signal.SIGINT, self.handle_signal)
+        signal.signal(signal.SIGTERM, self.handle_signal)
+        signal.signal(signal.SIGINT, self.handle_signal)
 
         self.main_window = MainWindow(self)
         self.add_window(self.main_window)
@@ -68,7 +72,7 @@ class MyApp(Gtk.Application):
 
         # Initialize Dummy class
         self.dummy_instance = Dummy()
-        status = self.dummy_instance.initialize(self.file_path, self.port_name)
+        status = self.dummy_instance.initialize(self.file_path, self.port_name, self.main_port_name)
         if status[0] == False:
             # Display error message and close the app
             # error_message = "Failed to initialize Dummy class. The application will now close."
@@ -76,9 +80,16 @@ class MyApp(Gtk.Application):
             GLib.idle_add(self.show_critical_error, error_message)
             return  # Stop further execution
         
-        self.main_port_name = self.dummy_instance.main_port
+        # self.main_port_name = self.dummy_instance.main_port
 
-        self.virtual_display_instance = VirtualDisplay(self.port_name)
+        # fetch the infos from xrandr command and set them
+        self.set_xrandr_info()
+
+        # Create the vd instance
+        self.virtual_display_instance = VirtualDisplay()
+        # Give all the resolutions to vd
+        self.virtual_display_instance.resolutions = self.resolutions
+        
         # Initiliaze the vd with data from config.json
         try :
             self.virtual_display_instance.width = self.data["user-settings"]["virtual-display"]["width"]
@@ -108,7 +119,6 @@ class MyApp(Gtk.Application):
 
     def clean_up(self):
         # This function will be called when the program closes or crahes
-        
         # Check the virtual display is connected or not
         if self.virtual_display_instance.status == True:
             # Unlug the virtual display
@@ -189,9 +199,53 @@ class MyApp(Gtk.Application):
             self.show_critical_error("Error: Invalid JSON format.")
             self.data = {}  # Fallback to an empty dictionary
 
+    def set_xrandr_info(self):
+        port_name = self.port_name
+        # Run the xrandr command and capture the output
+        result = subprocess.run(['xrandr'], stdout=subprocess.PIPE, text=True)
+        output = result.stdout
+
+        # Extract valid port names (lines that start with a port name)
+        found_port = False
+        resolutions = []
+        ports = []
+        for line in output.splitlines():
+            # Get the main(primary) port name
+            if " connected " in line and " primary " in line:
+                main_port = line.split()[0] # The first word is the port name 
+
+            # Get the ports 
+            if " connected" in line or " disconnected" in line:
+                # Skip the main port
+                if main_port in line:
+                    continue
+                port = line.split()[0]  # The first word is the port name
+                ports.append(port)
+            
+            # Find the port
+            if port_name in line and 'connected' in line:
+                found_port = True
+                continue  # Move to the next line to start parsing resolutions
+            
+            # If we're in the correct display port section, look for resolutions
+            if found_port:
+                # Stop processing if we reach another display port section
+                if 'connected' in line:
+                    found_port = False
+                
+                # Extract resolution if the line contains a resolution like "1920x1080"
+                if 'x' in line and '+' not in line:
+                    resolution = line.strip().split()[0]
+                    resolutions.append(resolution)
+
+        # Set the data into relevant variables
+        self.main_port_name = main_port
+        self.ports = ports
+        self.resolutions = resolutions
+        return
 
     def on_config_saved_dmy(self, file_path, port_name):
-        status = self.dummy_instance.initialize(file_path, port_name)
+        status = self.dummy_instance.initialize(file_path, port_name, self.main_port_name)
         if status[0] == False:
             error_message = status[1]
             GLib.idle_add(self.show_error_message, error_message)
