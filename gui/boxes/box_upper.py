@@ -119,7 +119,7 @@ class BoxUpper:
         box.pack_start(button_configure, False, False, 10)
 
         self.button_toggle_vd = Gtk.Button()
-        self.button_toggle_vd.connect("clicked", self.on_apply_clicked_vd)
+        self.button_toggle_vd.connect("clicked", self.on_toggle_clicked_vd)
         box.pack_start(self.button_toggle_vd, False, False, 10)
 
         # update the box to get info
@@ -136,7 +136,7 @@ class BoxUpper:
         config_window.show_all()
         self.update_display_box()
 
-    def on_apply_clicked_vd(self, button):
+    def on_toggle_clicked_vd(self, button):
         status = None
 
         # Check the virtual-display status

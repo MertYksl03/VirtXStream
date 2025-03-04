@@ -60,7 +60,7 @@ class ConfigWindow(Gtk.Window):
         # Port name entry
         grid.attach(Gtk.Label(label="Port Name:"), 0, 3, 1, 1)
         self.port_name_entry = Gtk.Entry()
-        self.port_name_entry.set_placeholder_text("Current port name: " + self.app.dummy_instance.port_name)
+        self.port_name_entry.set_placeholder_text("Current port name: " + self.app.port_name)
         grid.attach(self.port_name_entry, 1, 3, 1, 1)
 
         # Save button
@@ -89,10 +89,10 @@ class ConfigWindow(Gtk.Window):
             self.show_error_dialog("Both fields are required\nYou need to fill the both fields")
             return 
         
-        ports = self.app.dummy_instance.ports
+        ports = self.app.ports
         if ports:
             if not port_name in ports:
-                self.show_error_dialog("Invalid port name \nAvaible ports: " + str(self.app.dummy_instance.ports))
+                self.show_error_dialog("Invalid port name \nAvaible ports: " + str(ports))
                 return
         
         # Add '/' to end of the filepath if the user didnt put it 
