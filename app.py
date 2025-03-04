@@ -210,9 +210,9 @@ class MyApp(Gtk.Application):
         self.virtual_display_instance.position = position
 
         # save the configuration to json file
-        self.data["user-setting"]["virtual-display"]["width"] = width
-        self.data["user-setting"]["virtual-display"]["height"] = height
-        self.data["user-setting"]["virtual-display"]["position"] = position
+        self.data["user-settings"]["virtual-display"]["width"] = width
+        self.data["user-settings"]["virtual-display"]["height"] = height
+        self.data["user-settings"]["virtual-display"]["position"] = position
         
         self.save_user_settings()
     
