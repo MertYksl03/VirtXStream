@@ -92,8 +92,7 @@ class MyApp(Gtk.Application):
         
         # Initiliaze the vd with data from config.json
         try :
-            self.virtual_display_instance.width = self.data["user-settings"]["virtual-display"]["width"]
-            self.virtual_display_instance.height = self.data["user-settings"]["virtual-display"]["height"]
+            self.virtual_display_instance.resolution = self.data["user-settings"]["virtual-display"]["resolution"]
             self.virtual_display_instance.position = self.data["user-settings"]["virtual-display"]["position"]
         except Exception as e:
             self.show_critical_error(str(e))
@@ -257,15 +256,13 @@ class MyApp(Gtk.Application):
             # Write the new json file 
             return self.save_user_settings()
             
-    def on_config_save_vd(self, width ,height, position):
+    def on_config_save_vd(self, resolution, position):
         # Assign the width, height and position
-        self.virtual_display_instance.width = width
-        self.virtual_display_instance.height = height
+        self.virtual_display_instance.resolution = resolution
         self.virtual_display_instance.position = position
 
         # save the configuration to json file
-        self.data["user-settings"]["virtual-display"]["width"] = width
-        self.data["user-settings"]["virtual-display"]["height"] = height
+        self.data["user-settings"]["virtual-display"]["resolution"] = resolution
         self.data["user-settings"]["virtual-display"]["position"] = position
         
         self.save_user_settings()

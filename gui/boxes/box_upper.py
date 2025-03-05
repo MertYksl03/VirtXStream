@@ -3,7 +3,7 @@ import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gdk, GLib  #type: ignore
 
-from gui.configure_window import ConfigWindow
+from gui.configure_windows import ConfigWindow
 
 # THE WIDGETS THAT UPDATES, THEIR REFERANCE MUST BE GLOBAL 
 
@@ -13,6 +13,7 @@ class BoxUpper:
         self.app = app
         self.dummy_instance = self.app.dummy_instance
         self.vd_instance = self.app.virtual_display_instance
+        
         self.box_upper = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         self.parent_window = parent_window
         

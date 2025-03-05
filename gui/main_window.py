@@ -3,7 +3,7 @@ import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gdk #type: ignore
 
-from gui.configure_window import ConfigWindow
+from gui.configure_windows import ConfigWindow
 from gui.boxes.box_upper import BoxUpper
 from gui.boxes.box_lower import BoxLower
 

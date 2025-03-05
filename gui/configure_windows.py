@@ -12,11 +12,14 @@ class ConfigWindow(Gtk.Window):
         self.set_transient_for(parent)
         self.set_modal(True)
 
-        # Store referance to app object
+        # Store the referance of app object
         self.app = app
 
-        # Initialize vd_position and set it to left for default
-        self.vd_position = "left-of"
+        # Initialize vd_resolution and vd_position
+        self.vd_resolution = None
+        self.vd_position = None
+        # Get the resolutions from app object
+        self.vd_resolutions = self.app.resolutions
 
         header_bar = Gtk.HeaderBar()
         header_bar.set_show_close_button(False)  # Hide the close button
@@ -31,7 +34,13 @@ class ConfigWindow(Gtk.Window):
             self.add(self.create_window_dummy_config())
         elif which_config == 1:
             Gtk.Window.set_title(self, "Virtual Display Settings")
-            self.add(self.create_window_vd_config())
+            self.add(self.create_window_vd_config(resolutions=self.vd_resolutions))
+        elif which_config == 2:
+            Gtk.Window.set_title(self, "ADB Server Settings")
+            # Add stuff here
+        elif which_config == 3:
+            Gtk.Window.set_title(self, "VNC Server Settings")
+            # Add stuff here
 
     def create_window_dummy_config(self):
         # Create a grid to arrange widgets
@@ -107,7 +116,7 @@ class ConfigWindow(Gtk.Window):
                 self.destroy()
     
 
-    def create_window_vd_config(self):
+    def create_window_vd_config(self, resolutions):
        # Create a grid to arrange widgets
         grid = Gtk.Grid()
         grid.set_column_spacing(10)
@@ -115,22 +124,41 @@ class ConfigWindow(Gtk.Window):
 
         # Can add a info: all the widget's relative height attributes are aligned 
 
-        # Width entry
-        grid.attach(Gtk.Label(label="Width:"), 0, 1, 1, 1)
-        self.width_entry = Gtk.Entry()
-        self.width_entry.set_placeholder_text("Current width: " + str(self.app.virtual_display_instance.width))
-        grid.attach(self.width_entry, 1, 1, 3, 1)  # Span across 3 columns
+        # Info about the resolution
+        info_resolution_string = "Select resolution for virtual display"
+        info_resolution = Gtk.Label()
+        info_resolution.set_label(info_resolution_string)
+        grid.attach(info_resolution, 0, 0, 4, 1)  # Span across 4 columns
 
-        # Height entry
-        grid.attach(Gtk.Label(label="Height:"), 0, 2, 1, 1)
-        self.height_entry = Gtk.Entry()
-        self.height_entry.set_placeholder_text("Current height: " + str(self.app.virtual_display_instance.height))
-        grid.attach(self.height_entry, 1, 2, 3, 1)  # Span across 3 columns
+        # Info about current resolution
+        info_current_res_string = f"Current Resolution: {self.app.virtual_display_instance.resolution}"
+        info_current_res = Gtk.Label()
+        info_current_res.set_label(info_current_res_string)
+        grid.attach(info_current_res, 0, 1, 4, 1)  # Span across 4 columns
+
+        # Resolution buttons
+        vbox_resolutions = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        swin = Gtk.ScrolledWindow()
+        swin.add_with_viewport(vbox_resolutions)
+        swin.set_min_content_height(300)
+        grid.attach(swin, 0, 2, 4, 1)
+
+        # Variable to store the first radio button (used for grouping)
+        first_radio = None
+
+        # Dynamically create radio buttons based on the resolutions array
+        for resolution in resolutions:
+            radio = Gtk.RadioButton.new_with_label_from_widget(first_radio, resolution)
+            if first_radio is None:
+                first_radio = radio  # Set the first radio button for grouping
+            vbox_resolutions.pack_start(radio, False, False, 0)
+            radio.connect("toggled", self.on_resolution_buttons_toggle_vd, resolution)
 
         info_position_string = "Select the position for virtual display"
         info_position = Gtk.Label()
         info_position.set_label(info_position_string)
         grid.attach(info_position, 0, 3, 4, 1)  # Span across 4 columns
+
 
         # Buttons for position
         # Create a radio button group
@@ -161,36 +189,31 @@ class ConfigWindow(Gtk.Window):
         grid.attach(button_close, 0, 5, 2, 2)  # Span across 2 columns, Row 4
 
         return grid
+    
+    def on_resolution_buttons_toggle_vd(self, button, resolution):
+        if button.get_active():
+            self.vd_resolution = resolution
 
     def on_position_buttons_toggled_vd(self, button, name):
         if button.get_active():
             self.vd_position = name
 
     def on_save_clicked_vd(self, button):
-        width = self.width_entry.get_text().strip()
-        height = self.height_entry.get_text().strip()
+        resolution = self.vd_resolution
         position = self.vd_position
 
-        # First check if the entries are not empty
-        if not width or not height: 
+        # Check did user select a resolution
+        if not resolution: 
             # show an error dialog to user
-            self.show_error_dialog("Both fields are required\nYou need to fill the both fields")
+            self.show_error_dialog("Please select a resolution")
             return 
         
-        # Check if the entries are integers
-        try:
-            width = int (width)
-            height = int (height)
-        except Exception:
-            self.show_error_dialog("Please enter numbers")
-            return
+        if not position:
+            # show an error dialog to user
+            self.show_error_dialog("Please select a position")
+            return     
         
-        # Not a perfect way to check it. Should be changed
-        if width < 0 or width > 2000 or height < 0 or height > 2000:
-            self.show_error_message("Please enter a valid resolution")
-            return
-        
-        self.app.on_config_save_vd(width ,height, position)
+        self.app.on_config_save_vd(resolution, position)
         self.destroy()
         
     def show_error_dialog(self, message):
