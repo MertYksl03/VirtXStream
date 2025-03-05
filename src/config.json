@@ -5,7 +5,7 @@
             "default_port": "HDMI-1-0"
         },
         "virtual-display": {
-            "resolution": "800x600",
+            "resolution": "1280x800",
             "position": "right-of"
         },
         "Vnc": {
@@ -18,8 +18,8 @@
             "default_port": "HDMI-1-0"
         },
         "virtual-display": {
-            "resolution": "1280x800",
-            "position": "left-of"
+            "resolution": "1920x1080",
+            "position": "right-of"
         },
         "Vnc": {
             "default_port": "5900"

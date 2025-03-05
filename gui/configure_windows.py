@@ -15,6 +15,9 @@ class ConfigWindow(Gtk.Window):
         # Store the referance of app object
         self.app = app
 
+        # Initialize dmy_port_name
+        self.dmy_port_name = None 
+
         # Initialize vd_resolution and vd_position
         self.vd_resolution = None
         self.vd_position = None
@@ -31,7 +34,7 @@ class ConfigWindow(Gtk.Window):
         # 0 = dummy, 1 = virtual-display, 2 = adb-server, 3 = Vnc-server
         if which_config == 0:
             Gtk.Window.set_title(self, "Dummy Config Settings")
-            self.add(self.create_window_dummy_config())
+            self.add(self.create_window_dummy_config(self.app.ports))
         elif which_config == 1:
             Gtk.Window.set_title(self, "Virtual Display Settings")
             self.add(self.create_window_vd_config(resolutions=self.vd_resolutions))
@@ -41,8 +44,33 @@ class ConfigWindow(Gtk.Window):
         elif which_config == 3:
             Gtk.Window.set_title(self, "VNC Server Settings")
             # Add stuff here
+    
+    # FUNCTIONS THOSE USED BY MORE THAN ONE BOX
 
-    def create_window_dummy_config(self):
+    def on_close_clicked(self, widget):
+        self.destroy()
+
+    def show_error_dialog(self, message):
+        dialog = Gtk.MessageDialog(
+            parent=self,
+            flags=Gtk.DialogFlags.MODAL,
+            type=Gtk.MessageType.ERROR,
+            buttons=Gtk.ButtonsType.OK,
+            message_format=message
+        )
+        dialog.set_title("Error")
+        dialog.run()
+        dialog.destroy()
+
+    def create_hidden_radio_box(self):
+        # Create a hidden radio button to act as the initial selection
+        radio_button = Gtk.RadioButton.new_with_label(None, "Hidden")
+        radio_button.set_visible(False)  # Hide the dummy radio button
+        radio_button.set_active(True)  # Set it as active initially
+
+        return radio_button
+    
+    def create_window_dummy_config(self, ports):
         # Create a grid to arrange widgets
         grid = Gtk.Grid()
         grid.set_column_spacing(10)
@@ -61,16 +89,26 @@ class ConfigWindow(Gtk.Window):
         grid.attach(self.file_path_entry, 1, 1, 1, 1)
 
         # Info about port name
-        info_port_name_string = "Enter the port name that you want to connect your virtual display"
+        info_port_name_string = "Select the port that you want to connect your virtual display"
         info_port_name_label = Gtk.Label()
         info_port_name_label.set_label(info_port_name_string)
         grid.attach(info_port_name_label, 0, 2, 2, 1)  # Span across 2 columns
 
-        # Port name entry
-        grid.attach(Gtk.Label(label="Port Name:"), 0, 3, 1, 1)
-        self.port_name_entry = Gtk.Entry()
-        self.port_name_entry.set_placeholder_text("Current port name: " + self.app.port_name)
-        grid.attach(self.port_name_entry, 1, 3, 1, 1)
+        # Port selector
+        hbox_ports = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        hbox_ports.set_halign(Gtk.Align.CENTER)
+        swin = Gtk.ScrolledWindow()
+        swin.add_with_viewport(hbox_ports)
+        grid.attach(swin, 0, 3, 2, 1)
+
+        # Create a hidden radio button to act as the initial selection
+        first_radio = self.create_hidden_radio_box()
+
+        # Dynamically create radio buttons based on the resolutions array
+        for port in ports:
+            radio = Gtk.RadioButton.new_with_label_from_widget(first_radio, port)
+            hbox_ports.pack_start(radio, False, False, 0)
+            radio.connect("toggled", self.on_ports_buttons_toggle_dummy, port)
 
         # Save button
         button_save = Gtk.Button(label="Save")
@@ -84,37 +122,34 @@ class ConfigWindow(Gtk.Window):
 
         return grid
     
-    def on_close_clicked(self, widget):
-        self.destroy()
+    def on_ports_buttons_toggle_dummy(self, button, port_name):
+        if button.get_active():
+            self.dmy_port_name = port_name
 
     def on_save_clicked_dmy(self, widget):
 
         file_path = self.file_path_entry.get_text().strip()
-        port_name = self.port_name_entry.get_text().strip()
+        port_name = self.dmy_port_name
 
         # First check if the entries are not empty
-        if not file_path or not port_name: 
+        if not file_path: 
             # show an error dialog to user
-            self.show_error_dialog("Both fields are required\nYou need to fill the both fields")
+            self.show_error_dialog("Please enter the filepath")
             return 
         
-        ports = self.app.ports
-        if ports:
-            if not port_name in ports:
-                self.show_error_dialog("Invalid port name \nAvaible ports: " + str(ports))
-                return
+        if not port_name:
+            self.show_error_dialog("Please select a port")
+            return
         
         # Add '/' to end of the filepath if the user didnt put it 
         if file_path[-1] != "/":
             file_path = file_path + "/"
-
 
         # Call the callback funtion with enterd values
         if self.app.on_config_saved_dmy:
             if self.app.on_config_saved_dmy(file_path, port_name) == True:
                 # Close the configuration window
                 self.destroy()
-    
 
     def create_window_vd_config(self, resolutions):
        # Create a grid to arrange widgets
@@ -143,14 +178,12 @@ class ConfigWindow(Gtk.Window):
         swin.set_min_content_height(300)
         grid.attach(swin, 0, 2, 4, 1)
 
-        # Variable to store the first radio button (used for grouping)
-        first_radio = None
+        # Create a hidden radio button to act as the initial selection
+        first_radio = self.create_hidden_radio_box()
 
         # Dynamically create radio buttons based on the resolutions array
         for resolution in resolutions:
             radio = Gtk.RadioButton.new_with_label_from_widget(first_radio, resolution)
-            if first_radio is None:
-                first_radio = radio  # Set the first radio button for grouping
             vbox_resolutions.pack_start(radio, False, False, 0)
             radio.connect("toggled", self.on_resolution_buttons_toggle_vd, resolution)
 
@@ -162,19 +195,23 @@ class ConfigWindow(Gtk.Window):
 
         # Buttons for position
         # Create a radio button group
-        button_left = Gtk.RadioButton.new_with_label(None, "Left")
+
+        # Create a hidden radio button to act as the initial selection
+        first_radio_position = self.create_hidden_radio_box()
+        
+        button_left = Gtk.RadioButton.new_with_label_from_widget(first_radio_position, "Left")
         button_left.connect("toggled", self.on_position_buttons_toggled_vd, "left-of")
         grid.attach(button_left, 0, 4, 1, 1)  # Column 0, Row 3
 
-        button_below = Gtk.RadioButton.new_with_label_from_widget(button_left, "Below")
+        button_below = Gtk.RadioButton.new_with_label_from_widget(first_radio_position, "Below")
         button_below.connect("toggled", self.on_position_buttons_toggled_vd, "below")
         grid.attach(button_below, 1, 4, 1, 1)  # Column 1, Row 3
 
-        button_above = Gtk.RadioButton.new_with_label_from_widget(button_left, "Above")
+        button_above = Gtk.RadioButton.new_with_label_from_widget(first_radio_position, "Above")
         button_above.connect("toggled", self.on_position_buttons_toggled_vd, "above")
         grid.attach(button_above, 2, 4, 1, 1)  # Column 2, Row 3
 
-        button_right = Gtk.RadioButton.new_with_label_from_widget(button_left, "Right")
+        button_right = Gtk.RadioButton.new_with_label_from_widget(first_radio_position, "Right")
         button_right.connect("toggled", self.on_position_buttons_toggled_vd, "right-of")
         grid.attach(button_right, 3, 4, 1, 1)  # Column 3, Row 3
 
@@ -216,14 +253,3 @@ class ConfigWindow(Gtk.Window):
         self.app.on_config_save_vd(resolution, position)
         self.destroy()
         
-    def show_error_dialog(self, message):
-        dialog = Gtk.MessageDialog(
-            parent=self,
-            flags=Gtk.DialogFlags.MODAL,
-            type=Gtk.MessageType.ERROR,
-            buttons=Gtk.ButtonsType.OK,
-            message_format=message
-        )
-        dialog.set_title("Error")
-        dialog.run()
-        dialog.destroy()
