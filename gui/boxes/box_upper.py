@@ -89,7 +89,7 @@ class BoxUpper:
 
     # This function updates the ui elements of config box 
     def update_config_box(self):
-        new_status = self.dummy_instance.status
+        new_status = f"{self.dummy_instance.status}"
         
         # Update status label
         GLib.idle_add(self.label_status_dmy.set_text, new_status)  
