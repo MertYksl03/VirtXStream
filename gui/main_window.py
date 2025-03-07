@@ -3,7 +3,7 @@ import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gdk #type: ignore
 
-from gui.configure_window import ConfigWindow
+from gui.configure_windows import ConfigWindow
 from gui.boxes.box_upper import BoxUpper
 from gui.boxes.box_lower import BoxLower
 
@@ -22,7 +22,7 @@ class MainWindow(Gtk.ApplicationWindow):
         self.set_border_width(10)
         self.set_name("main-window") # name for css
         self.app = app
-        # With holding the refarance to the dummy_instance all windows have the information about the dummy config(filepath, ports, portname etc.)
+        # Hold the referance to the dummy_instance object
         self.dummy_instance = app.dummy_instance
 
         # Load external CSS
@@ -69,7 +69,7 @@ class MainWindow(Gtk.ApplicationWindow):
 
     def on_restore_clicked(self, button):
         if self.app.restore_defaults() == True:
-            self.app.show_info_dialog("Restoring to default is succesful")
+            self.app.show_info_message("Restoring to default is succesful")
 
 
     def show_error_dialog(self, message):

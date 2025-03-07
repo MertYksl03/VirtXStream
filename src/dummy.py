@@ -8,9 +8,8 @@ class Dummy:
     # Global variables
     file_path = None        # Holds the file path of Xorg config files
     port_name = None        # Holds the name of the display port (virtual display)
-    status = None           # Holds the status 
-    ports = None            # Holds all the ports the computer has for display
     main_port = None        # Holds the name of the main display port 
+    status = None           # Holds the status 
 
     def __init__(self):
         # Private variables
@@ -19,11 +18,10 @@ class Dummy:
         
         self.is_dummy_activated = False
 
-    def initialize(self,file_path, port_name):
+    def initialize(self,file_path, port_name, main_port):
         self.file_path = file_path
         self.port_name = port_name
-        self.ports = self.get_ports()
-        self.main_port = self.get_main_port()
+        self.main_port = main_port
 
         # Read the files 
         self.__nvidia_conf = FileManager.read_file(file_path + "10-nvidia.conf")
@@ -97,7 +95,7 @@ class Dummy:
             return True, "Dummy config activated"
         else:
             self.update_status()
-            return False, "Couldn't create a dummy config"
+            return False, "Couldn't create a dummy config \n"
         
 
     # This function deletes the dummy config
@@ -117,39 +115,6 @@ class Dummy:
             except:
                 self.update_status()
                 return False, "Couldn't delete the dummy config"
-
-    def get_ports(self):
-        # Run the xrandr command and capture the output
-        result = subprocess.run(['xrandr'], stdout=subprocess.PIPE, text=True)
-        output = result.stdout
-
-        # Extract valid port names (lines that start with a port name)
-        ports = []
-        for line in output.splitlines():
-            if " connected" in line or " disconnected" in line:
-                if "eDP" in line:
-                    continue
-                port = line.split()[0]  # The first word is the port name
-                ports.append(port)
-        
-        return ports 
-    
-    # Should use different logic or merge get_ports and get_main_port functions 
-    # DEFINITELY NEED TO REMOVE THIS FUNCTION
-    def get_main_port(self):
-        # Run the xrandr command and capture the output
-        result = subprocess.run(['xrandr'], stdout=subprocess.PIPE, text=True)
-        output = result.stdout
-
-        main_port = None
-    
-        # Extract the valid main port 
-        for line in output.splitlines():
-            if " connected " in line and " primary " in line:
-                main_port = line.split()[0] # The first word is the port name 
-            
-
-        return main_port
 
 
     # FOR DEVELOPMENT
