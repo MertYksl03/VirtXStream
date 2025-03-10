@@ -153,12 +153,13 @@ class BoxUpper:
     
     # This function updates the ui elements of vd-box
     def update_display_box(self):
-        active_status = self.vd_instance.active_resolution
+        status = self.vd_instance.status
+        active_resolution = self.vd_instance.active_resolution
 
-        if active_status == None:
+        if status == False:
             new_status = "Disabled"
         else:
-            new_status = f"Resolution: {active_status}"
+            new_status = f"Resolution: {active_resolution}"
         
         # Update status label
         GLib.idle_add(self.label_status_vd.set_text, new_status)  

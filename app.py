@@ -89,6 +89,8 @@ class MyApp(Gtk.Application):
         self.virtual_display_instance = VirtualDisplay()
         # Give all the resolutions to vd
         self.virtual_display_instance.resolutions = self.resolutions
+        # Check and assign the status of vd
+        self.virtual_display_instance.status = self.check_vd_status()
         
         # Initiliaze the vd with data from config.json
         try :
@@ -242,6 +244,19 @@ class MyApp(Gtk.Application):
         self.ports = ports
         self.resolutions = resolutions
         return
+
+    def check_vd_status(self):
+        port_name = self.port_name
+        # Run the xrandr command and capture the output
+        command = "xrandr --listmonitors"
+        result = subprocess.run(command.split(), stdout=subprocess.PIPE, text=True)
+        output = result.stdout
+
+        for line in output.splitlines():
+            if port_name in line:
+                return True
+            
+        return False
 
     def on_config_saved_dmy(self, file_path, port_name):
         status = self.dummy_instance.initialize(file_path, port_name, self.main_port_name)

@@ -1,5 +1,4 @@
 import subprocess
-import shutil
 
 class VirtualDisplay:
     # Global variables
@@ -29,8 +28,6 @@ class VirtualDisplay:
         self.status = True
         return True, "Display configured succesfully"
 
-
-
     def unplug_virtual_display(self):
         try:
             # Unlug the virtaul display (does not render)
@@ -42,6 +39,3 @@ class VirtualDisplay:
         self.active_resolution = None
         self.status = False
         return True, "Virtual display is disconnected"
-    
-
-    
