@@ -185,6 +185,7 @@ class MyApp(Gtk.Application):
             self.quit()  # Close the program
 
     # NON-UI FUNCTIONS
+    
     def load_data(self):
         try:
             # Path to the JSON file

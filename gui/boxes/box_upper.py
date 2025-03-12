@@ -59,7 +59,7 @@ class BoxUpper:
         box.pack_start(button_configure, False, False, 10)
 
         self.button_toggle_dummy = Gtk.Button(label="Enable")
-        self.button_toggle_dummy.connect("clicked", self.on_toggle_clicked)
+        self.button_toggle_dummy.connect("clicked", self.on_toggle_clicked_dmy)
         self.button_toggle_dummy.set_name("button-enable")
         box.pack_start(self.button_toggle_dummy, False, False, 10)
 
@@ -72,7 +72,7 @@ class BoxUpper:
         config_window.show_all()
         self.update_config_box()
 
-    def on_toggle_clicked(self, button):
+    def on_toggle_clicked_dmy(self, button):
         status = None
 
         if self.button_toggle_dummy.get_label() == "Enable":
@@ -89,19 +89,27 @@ class BoxUpper:
 
     # This function updates the ui elements of config box 
     def update_config_box(self):
-        new_status = f"{self.dummy_instance.status}"
+        new_status = self.dummy_instance.status
+
+        #TODO: Display the status message according to status from dummy instance
+
+        if new_status == 1:
+            status_message = "Activated"
+        elif new_status == -1 or new_status == -2:
+            status_message = "Reboot required"
+        else:
+            status_message = "Disabled"
         
         # Update status label
-        GLib.idle_add(self.label_status_dmy.set_text, new_status)  
+        GLib.idle_add(self.label_status_dmy.set_text, status_message)  
 
         # Enable/Disable the button based on status
-        if new_status == "Activated":
-            GLib.idle_add(self.button_toggle_dummy.set_label, "Disable")  # Change button text
-            GLib.idle_add(self.button_toggle_dummy.set_name, "button-disable")  # Change button apperance
-            
-        else:
+        if new_status == 0 or new_status == -2:
             GLib.idle_add(self.button_toggle_dummy.set_label, "Enable")  # Change button text
             GLib.idle_add(self.button_toggle_dummy.set_name, "button-enable")  # Change button apperance
+        else:
+            GLib.idle_add(self.button_toggle_dummy.set_label, "Disable")  # Change button text
+            GLib.idle_add(self.button_toggle_dummy.set_name, "button-disable")  # Change button apperance
 
     # This box shows the info about the virtual display and lets the user to configure it
     def create_display_settings_box(self):
@@ -158,20 +166,16 @@ class BoxUpper:
 
         if status == False:
             new_status = "Disabled"
-        else:
-            new_status = f"Resolution: {active_resolution}"
-        
-        # Update status label
-        GLib.idle_add(self.label_status_vd.set_text, new_status)  
-
-        # Enable/Disable the button based on status
-        if new_status == "Disabled":
             GLib.idle_add(self.button_toggle_vd.set_label, "Enable")  # Change button text
             GLib.idle_add(self.button_toggle_vd.set_name, "button-enable")  # Change button apperance
             
         else:
+            new_status = f"Resolution: {active_resolution}"
             GLib.idle_add(self.button_toggle_vd.set_label, "Disable")  # Change button text
             GLib.idle_add(self.button_toggle_vd.set_name, "button-disable")  # Change button apperance
+        
+        # Update status label
+        GLib.idle_add(self.label_status_vd.set_text, new_status)  
 
 
     def create_adb_settings_box(self):

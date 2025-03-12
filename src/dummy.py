@@ -9,7 +9,7 @@ class Dummy:
     file_path = None        # Holds the file path of Xorg config files
     port_name = None        # Holds the name of the display port (virtual display)
     main_port = None        # Holds the name of the main display port 
-    status = None           # Holds the status 
+    status = None           # Holds the status (0 = disabled, 1 = enabled, -1 = reboot required(dmy placed r. now), -2 = reboot required(dmy deleted r. now))
 
     def __init__(self):
         # Private variables
@@ -39,7 +39,7 @@ class Dummy:
         # Check the dummmy is activated if it is then is_dummy_acitaved = True
         self.is_dummy_activated = self.check_dummy_activated()
 
-        self.status = self.check_status()
+        self.update_status()
 
         # If everything is ok then return True, meaning the initialize is succesfull
         return True, " "
@@ -66,13 +66,13 @@ class Dummy:
         is_dummy_activated = self.check_dummy_activated()
 
         if is_dummy_activated and is_port_shown_connected:
-            return "Activated"
+            return 1
         elif is_dummy_activated and not is_port_shown_connected:
-            return "Reboot required"
+            return -1 # dummy placed but not activated
         elif not is_dummy_activated and is_port_shown_connected:
-            return "Reboot required"
+            return -2 # dummy deleted but still activated
         else:
-            return "Disabled"
+            return 0
         
     def update_status(self):
         self.status = self.check_status()
@@ -95,7 +95,7 @@ class Dummy:
             return True, "Dummy config activated"
         else:
             self.update_status()
-            return False, "Couldn't create a dummy config \n"
+            return False, "Couldn't create a dummy config"
         
 
     # This function deletes the dummy config

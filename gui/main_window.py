@@ -59,7 +59,6 @@ class MainWindow(Gtk.ApplicationWindow):
 
 
         box_upper = BoxUpper(self.app, self)
-        # grid_outer.attach(box_upper, 0, 0, 1, 1)
         box_outer.pack_start(box_upper.get_box(), True, True, 0)
 
 

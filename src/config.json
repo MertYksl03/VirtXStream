@@ -19,7 +19,7 @@
         },
         "virtual-display": {
             "resolution": "1920x1080",
-            "position": "right-of"
+            "position": "below"
         },
         "Vnc": {
             "default_port": "5900"
