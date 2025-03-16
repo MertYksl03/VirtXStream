@@ -292,10 +292,5 @@ class MyApp(Gtk.Application):
             self.main_window.show_error_dialog(str(e))
             return False
 
-    # FOR DEVELOPMENT 
-    def print_dummy_variables(self):
-        print("Portname is " + self.dummy_instance.port_name)
-        print("Filepathh is " + self.dummy_instance.file_path)
-        print("The status is  " + self.dummy_instance.check_status())
 
 
