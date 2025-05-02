@@ -13,6 +13,7 @@ class BoxUpper:
         self.app = app
         self.dummy_instance = self.app.dummy_instance
         self.vd_instance = self.app.virtual_display_instance
+        self.adb_instance = self.app.adb_instance
         
         self.box_upper = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         self.parent_window = parent_window
@@ -186,17 +187,53 @@ class BoxUpper:
         label_title = Gtk.Label("ADB SERVER")
         box.pack_start(label_title, True, True, 10)
 
-        # The label about the status. This label will be dynamicly changes and displays the status of dummy config
-        label_status_dmy = Gtk.Label("Ready")
-        box.pack_start(label_status_dmy, True, True, 10)
+        # The label about the status. This label will be dynamicly changes and displays the status of adb server
+        self.label_status_adb = Gtk.Label()
+        box.pack_start(self.label_status_adb, True, True, 10)
         
-        button_configure = Gtk.Button(label="Configure")
-        box.pack_start(button_configure, False, False, 10)
+        # I think, i don't need configure button for adb
+        # button_configure = Gtk.Button(label="Configure")
+        # box.pack_start(button_configure, False, False, 10)
         
-        button_activate = Gtk.Button(label="Save")
-        box.pack_start(button_activate, False, False, 10)
+        self.button_toggle_adb = Gtk.Button()
+        self.button_toggle_adb.connect("clicked", self.on_toggle_clicked_adb)
+        box.pack_start(self.button_toggle_adb, False, False, 10)
+        
+        self.update_adb_settings_box()
         return box
+    
+    def on_toggle_clicked_adb(self, button):
+        status = None
 
+        print(self.button_toggle_adb.get_label())
+        if self.button_toggle_adb.get_label() == "Enable":
+            # Start the adb server
+            status = self.adb_instance.start_server()
+        else:
+            # Kill the adb server
+            status = self.adb_instance.kill_server()
+
+        print(status)
+        self.update_display_box()
+        self.show_status_message(status)
+    
+    def update_adb_settings_box(self):
+        status = self.adb_instance.status
+        port = self.adb_instance.port
+
+        if status == False:
+            new_status = "Disabled"
+            GLib.idle_add(self.button_toggle_adb.set_label, "Enable")  # Change button text
+            GLib.idle_add(self.button_toggle_adb.set_name, "button-enable")  # Change button apperance
+            
+        else:
+            new_status = f"Working at the port: {port}"
+            GLib.idle_add(self.button_toggle_adb.set_label, "Disable")  # Change button text
+            GLib.idle_add(self.button_toggle_adb.set_name, "button-disable")  # Change button apperance
+        
+        # Update status label
+        GLib.idle_add(self.label_status_adb.set_text, new_status)  
+    
 
     def create_vnc_settings_box(self):
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
@@ -212,8 +249,5 @@ class BoxUpper:
         
         button_configure = Gtk.Button(label="Configure")
         box.pack_start(button_configure, False, False, 10)
-        
-        button_activate = Gtk.Button(label="Save")
-        box.pack_start(button_activate, False, False, 10)
         
         return box

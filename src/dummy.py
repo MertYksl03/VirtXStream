@@ -24,7 +24,7 @@ class Dummy:
         self.main_port = main_port
 
         # Read the files 
-        self.__nvidia_conf = FileManager.read_file(file_path + "10-nvidia.conf")
+        self.__nvidia_conf = FileManager.read_file(file_path + "10-nvidia-drm-outputclass.conf")
         if self.__nvidia_conf == False:
             return False, "Couldn't read nvidia config file. \nFile path might be wrong"
         

@@ -10,6 +10,7 @@ from gui.main_window import MainWindow
 
 from src.dummy import Dummy
 from src.virtual_display import VirtualDisplay
+from src.adb_server import ADBServer
 
 import threading
 import json
@@ -26,6 +27,7 @@ class MyApp(Gtk.Application):
 
     dummy_instance = None
     virtual_display_instance = None
+    adb_instance = None
 
     def __init__(self):
         super().__init__(application_id="org.gnome.X-Vnc")  # Add an application ID
@@ -99,6 +101,9 @@ class MyApp(Gtk.Application):
         except Exception as e:
             self.show_critical_error(str(e))
             return
+        
+        # Create adb server instance
+        self.adb_instance = ADBServer()
         
         # if initialize is succesfull then return true
         return True

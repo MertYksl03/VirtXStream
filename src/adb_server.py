@@ -18,7 +18,7 @@ class ADBServer:
             subprocess.run(forward_command.split(), check=True)
         except subprocess.CalledProcessError as e:
             return False, f"Failed to start ADB server: \n{e}"
-        
+
         self.status = True
         return True, f"ADB server is enabled at port: {self.port}"
 
@@ -44,4 +44,4 @@ class ADBServer:
             else:
                 return False
         except subprocess.CalledProcessError:
-            pass
+                return False
