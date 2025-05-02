@@ -18,7 +18,7 @@ class VirtualDisplay:
 
         plug_command =  f"xrandr --output {port_name} --{self.position} {main_port_name} --mode {self.resolution}"
 
-        try :
+        try:
             # Plug the vd
             subprocess.run(plug_command.split(), check=True)
         except subprocess.CalledProcessError as e:
