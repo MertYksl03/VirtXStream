@@ -18,7 +18,7 @@
             "default_port": "HDMI-1-0"
         },
         "virtual-display": {
-            "resolution": "1280x800",
+            "resolution": "1368x768",
             "position": "right-of"
         },
         "Vnc": {
