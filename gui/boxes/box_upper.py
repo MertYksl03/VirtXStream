@@ -248,6 +248,7 @@ class BoxUpper:
         box.pack_start(self.label_status_vnc, True, True, 10)
         
         self.button_configure_vnc = Gtk.Button(label="Configure")
+        self.button_configure_vnc.connect("clicked", self.on_config_clicked_vnc)
         box.pack_start(self.button_configure_vnc, False, False, 10)
 
         self.button_toggle_vnc = Gtk.Button()
@@ -285,3 +286,13 @@ class BoxUpper:
 
         self.update_vnc_box()
         self.show_status_message(status)
+
+    def on_config_clicked_vnc(self, button):
+        # If the vnc server is enabled, dont let the user to configure it 
+        if self.vnc_instance.status == True:
+            self.app.show_error_message("To configure the VNC server you have to disable it")
+            return
+        # Open the configuration window
+        config_window = ConfigWindow(self.app, self.parent_window, 3)
+        config_window.show_all()
+        self.update_vnc_box()

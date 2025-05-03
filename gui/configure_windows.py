@@ -24,6 +24,8 @@ class ConfigWindow(Gtk.Window):
         # Get the resolutions from app object
         self.vd_resolutions = self.app.resolutions
 
+        self.vnc_is_just_usb = None
+
         header_bar = Gtk.HeaderBar()
         header_bar.set_show_close_button(False)  # Hide the close button
         self.set_titlebar(header_bar)  # Set the header bar as the window's title bar
@@ -43,7 +45,11 @@ class ConfigWindow(Gtk.Window):
             # Add stuff here
         elif which_config == 3:
             Gtk.Window.set_title(self, "VNC Server Settings")
-            # Add stuff here
+            self.add(self.create_window_vnc_config())
+        else:
+            # Invalid configuration type
+            raise ValueError("Invalid configuration type")
+        
     
     # FUNCTIONS THOSE USED BY MORE THAN ONE BOX
 
@@ -152,7 +158,7 @@ class ConfigWindow(Gtk.Window):
                 self.destroy()
 
     def create_window_vd_config(self, resolutions):
-       # Create a grid to arrange widgets
+        # Create a grid to arrange widgets
         grid = Gtk.Grid()
         grid.set_column_spacing(10)
         grid.set_row_spacing(10)
@@ -252,4 +258,84 @@ class ConfigWindow(Gtk.Window):
         
         self.app.on_config_save_vd(resolution, position)
         self.destroy()
+
+    
+    def create_window_vnc_config(self):
+        # Create a grid to arrange widgets
+        grid = Gtk.Grid()
+        grid.set_column_spacing(10)
+        grid.set_row_spacing(10)
+
+        # Ask for the port number
+        info_port_string = "Enter the port number for VNC server"
+        info_port = Gtk.Label()
+        info_port.set_label(info_port_string)
+        grid.attach(info_port, 0, 0, 4, 1)
+        # Port entry
+        grid.attach(Gtk.Label(label="Port:"), 0, 1, 1, 1)
+        self.port_entry = Gtk.Entry()
+        self.port_entry.set_placeholder_text("Current port: " + str(self.app.vnc_instance.port))
+        grid.attach(self.port_entry, 1, 1, 1, 1)
+        
+        # Ask for if they want to allow only USB
+        info_usb_string = "Allow only USB connection"
+        info_usb = Gtk.Label()
+        info_usb.set_label(info_usb_string)
+        grid.attach(info_usb, 0, 2, 4, 1)
+
+        # USB radio buttons
+        # Create a radio button group
+        # Create a hidden radio button to act as the initial selection
+        first_radio = self.create_hidden_radio_box()
+        button_yes = Gtk.RadioButton.new_with_label_from_widget(first_radio, "Yes")
+        button_yes.connect("toggled", self.on_usb_buttons_toggled_vnc, True)
+        grid.attach(button_yes, 0, 3, 1, 1)
+        button_no = Gtk.RadioButton.new_with_label_from_widget(first_radio, "No")
+        button_no.connect("toggled", self.on_usb_buttons_toggled_vnc, False)
+        grid.attach(button_no, 1, 3, 1, 1)
+
+        # Save button
+        button_save = Gtk.Button(label="Save")
+        button_save.connect("clicked", self.on_save_clicked_vnc)
+        grid.attach(button_save, 2, 4, 2, 2)
+        # Close button
+        button_close = Gtk.Button(label="Close")
+        button_close.connect("clicked", self.on_close_clicked)
+        grid.attach(button_close, 0, 4, 2, 2)
+    
+        return grid
+    
+    def on_usb_buttons_toggled_vnc(self, button, is_usb):
+        if button.get_active():
+            self.vnc_is_just_usb = is_usb
+    
+    def on_save_clicked_vnc(self, button):
+        port = self.port_entry.get_text().strip()
+        is_usb = self.vnc_is_just_usb
+
+        # Check if the port is not empty
+        if not port: 
+            # show an error dialog to user
+            self.show_error_dialog("Please enter the port")
+            return 
+        
+        # Check if the port is a number
+        if not port.isdigit():
+            self.show_error_dialog("Please enter a valid port number")
+            return
+        # Check if the port is in the valid range
+        port = int(port)
+        if port < 1024 or port > 65535:
+            self.show_error_dialog("Please enter a port number between 1024 and 65535")
+            return
+        port = str(port)
+
+        # Call the callback funtion with entered values
+        self.app.on_config_save_vnc(port, is_usb)
+        # Close the configuration window
+        self.destroy()
+
+
+       
+
         

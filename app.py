@@ -300,6 +300,16 @@ class MyApp(Gtk.Application):
         self.data["user-settings"]["virtual-display"]["position"] = position
         
         self.save_user_settings()
+
+    def on_config_save_vnc(self, port, is_just_usb):
+        self.vnc_instance.is_just_allow_usb = is_just_usb
+        self.vnc_instance.port = port
+
+        # save the configuration to json file
+        self.data["user-settings"]["vnc-server"]["is_just_usb"] = is_just_usb
+        self.data["user-settings"]["vnc-server"]["default_port"] = port
+        
+        self.save_user_settings()
     
     def save_user_settings(self): # By writing into config.json file 
         try:

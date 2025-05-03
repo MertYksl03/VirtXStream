@@ -25,9 +25,10 @@ class VNCServer:
 
     def start_x11vnc(self):
         if self.process is None:
-            vnc_command = f"x11vnc --clip {self.resolution} -viewonly -repeat -rfbwait 3000 -once -rfbport {self.port}"
+            # vnc_command = f"x11vnc --clip {self.resolution} -viewonly -repeat -rfbwait 3000 -once -rfbport {self.port}"
+            vnc_command = f"x11vnc --clip {self.resolution} -viewonly -repeat -once -rfbport {self.port}" 
             if self.is_just_allow_usb == True:
-                vnc_command.join("-allow 127.0.0.1") # This may change
+                vnc_command += " -allow 127.0.0.1" # This may change
             try:
                 self.process = subprocess.Popen(
                     vnc_command.split(),
