@@ -1,6 +1,7 @@
 import subprocess
 import psutil
 import socket
+import threading
 
 class VNCServer:
     resolution = None
@@ -8,7 +9,8 @@ class VNCServer:
     port = None
     process = None
     local_ip = None
-    status = None       # Holds the status of the vnc server
+    status = None           # Holds the status of the vnc server
+    is_connected = None     # Holds if a viewer is connected or not
 
     def __init__(self, resolution, just_usb, port):
         self.resolution = resolution
@@ -22,6 +24,7 @@ class VNCServer:
             self.status = True
 
         self.status = False
+        self.is_connected = False
 
     def start_x11vnc(self):
         if self.process is None:
@@ -32,8 +35,8 @@ class VNCServer:
             try:
                 self.process = subprocess.Popen(
                     vnc_command.split(),
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT
                 )
             except FileNotFoundError:
                 self.status = False
@@ -41,7 +44,7 @@ class VNCServer:
             except Exception as e:
                 self.status = False
                 return False, f"Error: {e}"
-
+            
         self.status = True
         return True, "VNC server is running"
     
@@ -78,4 +81,3 @@ class VNCServer:
             return ip
         except Exception as e:
             return f"Error: {e}"
-        

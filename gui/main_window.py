@@ -22,9 +22,7 @@ class MainWindow(Gtk.ApplicationWindow):
         self.set_border_width(10)
         self.set_name("main-window") # name for css
         self.app = app
-        # Hold the referance to the dummy_instance object
-        self.dummy_instance = app.dummy_instance
-
+        
         # Load external CSS
         provider = Gtk.CssProvider()
         provider.load_from_path("styles/style.css")  # Load the CSS file

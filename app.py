@@ -310,7 +310,32 @@ class MyApp(Gtk.Application):
         self.data["user-settings"]["vnc-server"]["default_port"] = port
         
         self.save_user_settings()
+
+    def start_vnc(self):
+        status = self.vnc_instance.start_x11vnc()
+        threading.Thread(target=self.monitor_vnc_server, daemon=True).start()
+        return status
     
+    def stop_vnc(self):
+        return self.vnc_instance.stop_x11vnc()
+
+    def monitor_vnc_server(self):
+        """Montitor the vnc server proccess and call the required functions to 
+            Update the ui. 
+        """
+        process = self.vnc_instance.process
+
+        for line in iter(process.stdout.readline, b''):
+            decoded = line.decode()
+            if "Got connection from client" in decoded:
+                self.vnc_instance.is_connected = True
+            if "viewer exited." in decoded:
+                self.vnc_instance.is_connected = False
+            
+            # FOR DEVELOPMENT
+            print(self.vnc_instance.is_connected)
+
+
     def save_user_settings(self): # By writing into config.json file 
         try:
             with open("src/config.json", 'w') as json_file:
@@ -319,6 +344,6 @@ class MyApp(Gtk.Application):
         except Exception as e:
             self.main_window.show_error_dialog(str(e))
             return False
-
+        
 
 

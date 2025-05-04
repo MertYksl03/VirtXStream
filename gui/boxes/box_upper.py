@@ -279,10 +279,10 @@ class BoxUpper:
 
         if self.button_toggle_vnc.get_label() == "Enable":
             # Start the vnc server
-            status = self.vnc_instance.start_x11vnc()
+            status = self.app.start_vnc()
         else:
             # Kill the vnc server
-            status = self.vnc_instance.stop_x11vnc()
+            status = self.app.stop_vnc()
 
         self.update_vnc_box()
         self.show_status_message(status)
