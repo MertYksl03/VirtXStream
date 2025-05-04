@@ -8,7 +8,8 @@
             "resolution": "1280x800",
             "position": "right-of"
         },
-        "Vnc": {
+        "vnc-server": {
+            "is_just_usb": "1",
             "default_port": "5900"
         }
     },
@@ -18,10 +19,11 @@
             "default_port": "HDMI-1-0"
         },
         "virtual-display": {
-            "resolution": "1280x800",
+            "resolution": "1368x768",
             "position": "right-of"
         },
-        "Vnc": {
+        "vnc-server": {
+            "is_just_usb": true,
             "default_port": "5900"
         }
     }

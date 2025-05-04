@@ -11,6 +11,7 @@ from gui.main_window import MainWindow
 from src.dummy import Dummy
 from src.virtual_display import VirtualDisplay
 from src.adb_server import ADBServer
+from src.vnc_server import VNCServer
 
 import threading
 import json
@@ -28,6 +29,7 @@ class MyApp(Gtk.Application):
     dummy_instance = None
     virtual_display_instance = None
     adb_instance = None
+    vnc_instance = None
 
     def __init__(self):
         super().__init__(application_id="org.gnome.X-Vnc")  # Add an application ID
@@ -104,6 +106,9 @@ class MyApp(Gtk.Application):
         
         # Create adb server instance
         self.adb_instance = ADBServer()
+
+        # Create Vnc server instance
+        self.vnc_instance = VNCServer("1368x768+1920+0", True, "5900")
         
         # if initialize is succesfull then return true
         return True
@@ -129,6 +134,14 @@ class MyApp(Gtk.Application):
         if self.virtual_display_instance.status == True:
             # Unlug the virtual display
             self.virtual_display_instance.unplug_virtual_display()
+
+        # Kill the adb server if it is enabled
+        if self.adb_instance.status == True:
+            self.adb_instance.kill_server()
+
+        # Kill the Vnc server if it is enabled
+        if self.vnc_instance.status == True:
+            self.vnc_instance.stop_x11vnc()
 
         super().do_shutdown(self) # Call the parent class's shutdown method
 
@@ -285,6 +298,16 @@ class MyApp(Gtk.Application):
         # save the configuration to json file
         self.data["user-settings"]["virtual-display"]["resolution"] = resolution
         self.data["user-settings"]["virtual-display"]["position"] = position
+        
+        self.save_user_settings()
+
+    def on_config_save_vnc(self, port, is_just_usb):
+        self.vnc_instance.is_just_allow_usb = is_just_usb
+        self.vnc_instance.port = port
+
+        # save the configuration to json file
+        self.data["user-settings"]["vnc-server"]["is_just_usb"] = is_just_usb
+        self.data["user-settings"]["vnc-server"]["default_port"] = port
         
         self.save_user_settings()
     

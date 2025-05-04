@@ -14,6 +14,7 @@ class BoxUpper:
         self.dummy_instance = self.app.dummy_instance
         self.vd_instance = self.app.virtual_display_instance
         self.adb_instance = self.app.adb_instance
+        self.vnc_instance = self.app.vnc_instance
         
         self.box_upper = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         self.parent_window = parent_window
@@ -22,7 +23,7 @@ class BoxUpper:
         self.box_upper.pack_start(self.create_config_box(), True, True, 10)
         self.box_upper.pack_start(self.create_display_settings_box(), True, True, 10)
         self.box_upper.pack_start(self.create_adb_settings_box(), True, True, 10)
-        self.box_upper.pack_start(self.create_vnc_settings_box(), True, True, 10)
+        self.box_upper.pack_start(self.create_vnc_box(), True, True, 10)
 
     def get_box(self):
         return self.box_upper
@@ -213,7 +214,6 @@ class BoxUpper:
             # Kill the adb server
             status = self.adb_instance.kill_server()
 
-        print(status)
         self.update_display_box()
         self.show_status_message(status)
     
@@ -235,7 +235,7 @@ class BoxUpper:
         GLib.idle_add(self.label_status_adb.set_text, new_status)  
     
 
-    def create_vnc_settings_box(self):
+    def create_vnc_box(self):
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         box.set_name("upper_box_boxes")
 
@@ -243,11 +243,56 @@ class BoxUpper:
         label_title = Gtk.Label("VNC SERVER")
         box.pack_start(label_title, True, True, 10)
 
-        # The label about the status. This label will be dynamicly changes and displays the status of dummy config
-        label_status_dmy = Gtk.Label("Ready")
-        box.pack_start(label_status_dmy, True, True, 10)
+        # The label about the status. This label will be dynamicly changes and displays the status
+        self.label_status_vnc = Gtk.Label("Ready")
+        box.pack_start(self.label_status_vnc, True, True, 10)
         
-        button_configure = Gtk.Button(label="Configure")
-        box.pack_start(button_configure, False, False, 10)
-        
+        self.button_configure_vnc = Gtk.Button(label="Configure")
+        self.button_configure_vnc.connect("clicked", self.on_config_clicked_vnc)
+        box.pack_start(self.button_configure_vnc, False, False, 10)
+
+        self.button_toggle_vnc = Gtk.Button()
+        self.button_toggle_vnc.connect("clicked", self.on_toggle_clicked_vnc)
+        box.pack_start(self.button_toggle_vnc, False, False, 10)
+
+        self.update_vnc_box()
         return box
+    
+    def update_vnc_box(self):
+        status = self.vnc_instance.status
+
+        if status == False:
+            new_status = "Disabled"
+            GLib.idle_add(self.button_toggle_vnc.set_label, "Enable")  # Change button text
+            GLib.idle_add(self.button_toggle_vnc.set_name, "button-enable")  # Change button apperance
+            
+        else:
+            new_status = "Working"
+            GLib.idle_add(self.button_toggle_vnc.set_label, "Disable")  # Change button text
+            GLib.idle_add(self.button_toggle_vnc.set_name, "button-disable")  # Change button apperance
+        
+        # Update status label
+        GLib.idle_add(self.label_status_vnc.set_text, new_status)
+
+    def on_toggle_clicked_vnc(self, button):
+        status = None
+
+        if self.button_toggle_vnc.get_label() == "Enable":
+            # Start the vnc server
+            status = self.vnc_instance.start_x11vnc()
+        else:
+            # Kill the vnc server
+            status = self.vnc_instance.stop_x11vnc()
+
+        self.update_vnc_box()
+        self.show_status_message(status)
+
+    def on_config_clicked_vnc(self, button):
+        # If the vnc server is enabled, dont let the user to configure it 
+        if self.vnc_instance.status == True:
+            self.app.show_error_message("To configure the VNC server you have to disable it")
+            return
+        # Open the configuration window
+        config_window = ConfigWindow(self.app, self.parent_window, 3)
+        config_window.show_all()
+        self.update_vnc_box()

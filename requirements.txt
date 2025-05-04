@@ -1,2 +1,4 @@
 xrandr
-android tools
+android-tools
+x11vnc
+python-psutil
