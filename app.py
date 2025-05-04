@@ -31,6 +31,9 @@ class MyApp(Gtk.Application):
     adb_instance = None
     vnc_instance = None
 
+    # UI updates
+    ui_update_needed = None
+
     def __init__(self):
         super().__init__(application_id="org.gnome.X-Vnc")  # Add an application ID
         # This varibales are private variables
@@ -109,6 +112,8 @@ class MyApp(Gtk.Application):
 
         # Create Vnc server instance
         self.vnc_instance = VNCServer("1368x768+1920+0", True, "5900")
+
+        self.ui_update_needed = False
         
         # if initialize is succesfull then return true
         return True
@@ -279,6 +284,8 @@ class MyApp(Gtk.Application):
 
     def on_config_saved_dmy(self, file_path, port_name):
         status = self.dummy_instance.initialize(file_path, port_name, self.main_port_name)
+        self.ui_update_needed = True
+        # Check if the initialization was successful
         if status[0] == False:
             error_message = status[1]
             GLib.idle_add(self.show_error_message, error_message)
@@ -289,6 +296,28 @@ class MyApp(Gtk.Application):
 
             # Write the new json file 
             return self.save_user_settings()
+        
+    def activate_dummy(self):
+        # Check if the dummy instance is None
+        if self.dummy_instance == None:
+            return False, "Dummy instance is not initialized"
+
+        # Activate the dummy config
+        status = self.dummy_instance.activate_dummy_config()
+        self.ui_update_needed = True
+        return status
+    
+    def deactivate_dummy(self):
+        # Check if the dummy instance is None
+        if self.dummy_instance == None:
+            return False, "Dummy instance is not initialized"
+
+
+        # Deactivate the dummy config
+        status = self.dummy_instance.deactivate_dummy_config()
+        self.ui_update_needed = True
+        return status
+    
             
     def on_config_save_vd(self, resolution, position):
         # Assign the width, height and position
@@ -301,6 +330,34 @@ class MyApp(Gtk.Application):
         
         self.save_user_settings()
 
+    def start_vd(self):
+        # Check if the virtual display instance is None
+        if self.virtual_display_instance == None:
+            return False, "Virtual display instance is not initialized"
+
+        # Start the virtual display
+        status = self.virtual_display_instance.plug_virtual_display(self.main_port_name, self.port_name)
+        self.ui_update_needed = True
+        return status
+    
+    def stop_vd(self):
+        # Check if the virtual display instance is None
+        if self.virtual_display_instance == None:
+            return False, "Virtual display instance is not initialized"
+
+        # Stop the virtual display
+        status = self.virtual_display_instance.unplug_virtual_display()
+        self.ui_update_needed = True
+        return status
+
+    def start_vnc(self):
+        status = self.vnc_instance.start_x11vnc()
+        threading.Thread(target=self.monitor_vnc_server, daemon=True).start()
+        return status
+    
+    def stop_vnc(self):
+        return self.vnc_instance.stop_x11vnc()
+    
     def on_config_save_vnc(self, port, is_just_usb):
         self.vnc_instance.is_just_allow_usb = is_just_usb
         self.vnc_instance.port = port
@@ -311,13 +368,6 @@ class MyApp(Gtk.Application):
         
         self.save_user_settings()
 
-    def start_vnc(self):
-        status = self.vnc_instance.start_x11vnc()
-        threading.Thread(target=self.monitor_vnc_server, daemon=True).start()
-        return status
-    
-    def stop_vnc(self):
-        return self.vnc_instance.stop_x11vnc()
 
     def monitor_vnc_server(self):
         """Montitor the vnc server proccess and call the required functions to 

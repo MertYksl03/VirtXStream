@@ -18,6 +18,12 @@ class BoxUpper:
         
         self.box_upper = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         self.parent_window = parent_window
+
+        # The status that currently showen in the app(in the ui)
+        self.status_dummy = self.dummy_instance.status
+        self.status_vd = self.vd_instance.status
+        self.status_adb = self.adb_instance.status
+        self.status_vnc = self.vnc_instance.status
         
         # Create and add sub-boxes
         self.box_upper.pack_start(self.create_config_box(), True, True, 10)
@@ -25,8 +31,42 @@ class BoxUpper:
         self.box_upper.pack_start(self.create_adb_settings_box(), True, True, 10)
         self.box_upper.pack_start(self.create_vnc_box(), True, True, 10)
 
+
+        # Update the boxes
+        self.update_config_box(self.status_dummy)
+        self.update_display_box(self.status_vd)
+        # self.update_adb_settings_box(self.status_adb)
+        # self.update_vnc_box(self.status_vnc)
+
     def get_box(self):
         return self.box_upper
+
+    # Function to update the ui
+    def update(self):
+        # Get the new status of the instances
+        new_status_dummy = self.dummy_instance.status
+        new_status_vd = self.vd_instance.status
+        new_status_adb = self.adb_instance.status
+        new_status_vnc = self.vnc_instance.status
+
+        # Check which box need an ui update
+        if self.status_dummy != new_status_dummy:
+            self.update_config_box(new_status_dummy)
+            self.status_dummy = new_status_dummy
+        
+        if self.status_vd != new_status_vd:
+            self.update_display_box(new_status_vd)
+            self.status_vd = new_status_vd
+        
+        if  self.status_adb != new_status_adb:
+            self.update_adb_settings_box(new_status_adb)
+            self.status_adb = new_status_adb
+        
+        if self.status_vnc != new_status_vnc:
+            self.update_vnc_box(new_status_vnc)
+            self.status_vnc = new_status_vnc
+
+        return True
     
     # FUNCTIONS THOSE ARE USED BY ALL BOXES SHOULD BE RIGHT BELOW THIS LINE
 
@@ -65,33 +105,27 @@ class BoxUpper:
         self.button_toggle_dummy.set_name("button-enable")
         box.pack_start(self.button_toggle_dummy, False, False, 10)
 
-        self.update_config_box()
         return box
 
     def on_configure_clicked_dummy(self, button):
         # Open the configuration window
         config_window = ConfigWindow(self.app, self.parent_window, 0)
         config_window.show_all()
-        self.update_config_box()
 
     def on_toggle_clicked_dmy(self, button):
         status = None
 
-        if self.button_toggle_dummy.get_label() == "Enable":
-            status = self.dummy_instance.activate_dummy_config() 
+        if self.status_dummy == 0 or self.status_dummy == -2:
+            status = self.app.activate_dummy()
 
         else:
-
-            status = self.dummy_instance.deactivate_dummy_config()
+            status = self.app.deactivate_dummy()
         
         # Show the status by displaying a message
         self.show_status_message(status)
-        # Update the UI
-        self.update_config_box()
 
     # This function updates the ui elements of config box 
-    def update_config_box(self):
-        new_status = self.dummy_instance.status
+    def update_config_box(self, new_status):
 
         #TODO: Display the status message according to status from dummy instance
 
@@ -133,8 +167,6 @@ class BoxUpper:
         self.button_toggle_vd.connect("clicked", self.on_toggle_clicked_vd)
         box.pack_start(self.button_toggle_vd, False, False, 10)
 
-        # update the box to get info
-        self.update_display_box()
         return box
 
     def on_config_clicked_vd(self, button):
@@ -145,39 +177,36 @@ class BoxUpper:
         # Open the configuration window
         config_window = ConfigWindow(self.app, self.parent_window, 1)
         config_window.show_all()
-        self.update_display_box()
 
     def on_toggle_clicked_vd(self, button):
         status = None
 
         # Check the virtual-display status
-        if self.button_toggle_vd.get_label() == "Enable":
-            # Plug the virtual display
-            status = self.vd_instance.plug_virtual_display(self.app.main_port_name, self.app.port_name)
+        if self.status_vd == False:
+            # Start the virtual display
+            status = self.app.start_vd()
         else:
-            # Unplug the virtual display 
-            status = self.vd_instance.unplug_virtual_display()
+            # Stop the virtual display 
+            status = self.app.stop_vd()
 
-        self.update_display_box()
         self.show_status_message(status)
     
     # This function updates the ui elements of vd-box
-    def update_display_box(self):
-        status = self.vd_instance.status
+    def update_display_box(self, new_status):
         active_resolution = self.vd_instance.active_resolution
 
-        if status == False:
-            new_status = "Disabled"
+        if new_status == False:
+            status_message = "Disabled"
             GLib.idle_add(self.button_toggle_vd.set_label, "Enable")  # Change button text
             GLib.idle_add(self.button_toggle_vd.set_name, "button-enable")  # Change button apperance
             
         else:
-            new_status = f"Resolution: {active_resolution}"
+            status_message = f"Resolution: {active_resolution}"
             GLib.idle_add(self.button_toggle_vd.set_label, "Disable")  # Change button text
             GLib.idle_add(self.button_toggle_vd.set_name, "button-disable")  # Change button apperance
         
         # Update status label
-        GLib.idle_add(self.label_status_vd.set_text, new_status)  
+        GLib.idle_add(self.label_status_vd.set_text, status_message)  
 
 
     def create_adb_settings_box(self):
@@ -200,7 +229,6 @@ class BoxUpper:
         self.button_toggle_adb.connect("clicked", self.on_toggle_clicked_adb)
         box.pack_start(self.button_toggle_adb, False, False, 10)
         
-        self.update_adb_settings_box()
         return box
     
     def on_toggle_clicked_adb(self, button):
@@ -255,7 +283,6 @@ class BoxUpper:
         self.button_toggle_vnc.connect("clicked", self.on_toggle_clicked_vnc)
         box.pack_start(self.button_toggle_vnc, False, False, 10)
 
-        self.update_vnc_box()
         return box
     
     def update_vnc_box(self):
