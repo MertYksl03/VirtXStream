@@ -15,11 +15,11 @@
     },
     "user-settings": {
         "x": {
-            "file_path": "testfiles/",
+            "file_path": "testfiles/a",
             "default_port": "HDMI-1-0"
         },
         "virtual-display": {
-            "resolution": "1920x1080",
+            "resolution": "1368x768",
             "position": "right-of"
         },
         "vnc-server": {

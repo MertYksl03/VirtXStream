@@ -35,8 +35,8 @@ class BoxUpper:
         # Update the boxes
         self.update_config_box(self.status_dummy)
         self.update_display_box(self.status_vd)
-        # self.update_adb_settings_box(self.status_adb)
-        # self.update_vnc_box(self.status_vnc)
+        self.update_adb_settings_box(self.status_adb)
+        self.update_vnc_box(self.status_vnc)
 
     def get_box(self):
         return self.box_upper
@@ -73,13 +73,13 @@ class BoxUpper:
     # Shows the status of an operation by displaying an dialog
     def show_status_message(self, status):
         if status == None:
-                self.app.show_error_message("Error: Operation Failed")
+                self.parent_window.show_error_message("Error: Operation Failed")
                 return
             
         if status[0] == True:
-            self.app.show_info_message(status[1])
+            self.parent_window.show_info_message(status[1])
         elif status[0] == False:
-            self.app.show_error_message(status[1])
+            self.parent_window.show_error_message(status[1])
 
 
     # This box holds the settings and status about dummy config
@@ -172,7 +172,7 @@ class BoxUpper:
     def on_config_clicked_vd(self, button):
         # If the virtual display is enabled, dont let the user to configure it 
         if self.vd_instance.status == True:
-            self.app.show_error_message("To configure the virtual display you have to disable it")
+            self.parent_window.show_error_message("To configure the virtual display you have to disable it")
             return
         # Open the configuration window
         config_window = ConfigWindow(self.app, self.parent_window, 1)
@@ -234,33 +234,30 @@ class BoxUpper:
     def on_toggle_clicked_adb(self, button):
         status = None
 
-        print(self.button_toggle_adb.get_label())
-        if self.button_toggle_adb.get_label() == "Enable":
+        if self.status_adb == False:
             # Start the adb server
-            status = self.adb_instance.start_server()
+            status = self.app.start_adb()
         else:
             # Kill the adb server
-            status = self.adb_instance.kill_server()
+            status = self.app.stop_adb()
 
-        self.update_display_box()
         self.show_status_message(status)
     
-    def update_adb_settings_box(self):
-        status = self.adb_instance.status
+    def update_adb_settings_box(self, new_status):
         port = self.adb_instance.port
 
-        if status == False:
-            new_status = "Disabled"
+        if new_status == False:
+            status_message = "Disabled"
             GLib.idle_add(self.button_toggle_adb.set_label, "Enable")  # Change button text
             GLib.idle_add(self.button_toggle_adb.set_name, "button-enable")  # Change button apperance
             
         else:
-            new_status = f"Working at the port: {port}"
+            status_message = f"Working at the port: {port}"
             GLib.idle_add(self.button_toggle_adb.set_label, "Disable")  # Change button text
             GLib.idle_add(self.button_toggle_adb.set_name, "button-disable")  # Change button apperance
         
         # Update status label
-        GLib.idle_add(self.label_status_adb.set_text, new_status)  
+        GLib.idle_add(self.label_status_adb.set_text, status_message)  
     
 
     def create_vnc_box(self):
@@ -285,41 +282,38 @@ class BoxUpper:
 
         return box
     
-    def update_vnc_box(self):
-        status = self.vnc_instance.status
+    def update_vnc_box(self, new_status):
 
-        if status == False:
-            new_status = "Disabled"
+        if new_status == False:
+            status_message = "Disabled"
             GLib.idle_add(self.button_toggle_vnc.set_label, "Enable")  # Change button text
             GLib.idle_add(self.button_toggle_vnc.set_name, "button-enable")  # Change button apperance
             
         else:
-            new_status = "Working"
+            status_message = "Working"
             GLib.idle_add(self.button_toggle_vnc.set_label, "Disable")  # Change button text
             GLib.idle_add(self.button_toggle_vnc.set_name, "button-disable")  # Change button apperance
         
         # Update status label
-        GLib.idle_add(self.label_status_vnc.set_text, new_status)
+        GLib.idle_add(self.label_status_vnc.set_text, status_message)
 
     def on_toggle_clicked_vnc(self, button):
         status = None
 
-        if self.button_toggle_vnc.get_label() == "Enable":
+        if self.status_vnc == False:
             # Start the vnc server
             status = self.app.start_vnc()
         else:
             # Kill the vnc server
             status = self.app.stop_vnc()
 
-        self.update_vnc_box()
         self.show_status_message(status)
 
     def on_config_clicked_vnc(self, button):
         # If the vnc server is enabled, dont let the user to configure it 
         if self.vnc_instance.status == True:
-            self.app.show_error_message("To configure the VNC server you have to disable it")
+            self.parent_window.show_error_message("To configure the VNC server you have to disable it")
             return
         # Open the configuration window
         config_window = ConfigWindow(self.app, self.parent_window, 3)
         config_window.show_all()
-        self.update_vnc_box()

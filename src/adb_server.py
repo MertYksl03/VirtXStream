@@ -23,7 +23,7 @@ class ADBServer:
         return True, f"ADB server is enabled at port: {self.port}"
 
 
-    def kill_server(self):
+    def stop_server(self):
         try:
             kill_command = "adb kill-server"
             subprocess.run(kill_command.split(), check=True)

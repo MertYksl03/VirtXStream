@@ -72,21 +72,72 @@ class MainWindow(Gtk.ApplicationWindow):
         self.monitor_thread.start()
 
 
-    def on_restore_clicked(self, button):
-        if self.app.restore_defaults() == True:
-            self.app.show_info_message("Restoring to default is succesful")
-
-
-    def show_error_dialog(self, message):
+    def show_info_message(self, message):
         dialog = Gtk.MessageDialog(
-            transient_for=self,
+            transient_for=self if self else None,
             flags=0,
-            message_type=Gtk.MessageType.ERROR,
+            message_type=Gtk.MessageType.INFO,
             buttons=Gtk.ButtonsType.OK,
             text=message,
         )
         dialog.run()
         dialog.destroy()
+        
+    def show_error_message(self, message):
+        "Show a error message to the user"
+        dialog = Gtk.MessageDialog(
+            transient_for=self if self else None,
+            flags=0,
+            message_type=Gtk.MessageType.ERROR,
+            buttons=Gtk.ButtonsType.OK,
+            text="Error",
+        )
+        dialog.format_secondary_text(message)
+
+        # Run the dialog and wait for user response
+        response = dialog.run()
+
+        # Destroy the dialog after the user responds
+        dialog.destroy()
+
+    def show_critical_error(self, message):
+        """
+        Show a critical error dialog and close the app when the user presses OK.
+        """
+        dialog = Gtk.MessageDialog(
+            transient_for=self if self else None,
+            flags=0,
+            message_type=Gtk.MessageType.ERROR,
+            buttons=Gtk.ButtonsType.OK,
+            text="Critical Error",
+        )
+        dialog.format_secondary_text(message)  # Add detailed error message
+
+        # Run the dialog and wait for user response
+        response = dialog.run()
+
+        # Destroy the dialog after the user responds
+        dialog.destroy()
+
+        # Close the application if the user presses OK
+        if response == Gtk.ResponseType.OK:
+            self.app.quit()  # Close the program
+
+    def on_restore_clicked(self, button):
+        if self.app.restore_defaults() == True:
+            self.app.show_info_message("Restoring to default is succesful")
+
+
+    # def show_error_dialog(self, message):
+    #     dialog = Gtk.MessageDialog(
+    #         transient_for=self,
+    #         flags=0,
+    #         message_type=Gtk.MessageType.ERROR,
+    #         buttons=Gtk.ButtonsType.OK,
+    #         text=message,
+    #     )
+    #     dialog.run()
+    #     dialog.destroy()
 
     def monitor_ui_needed_update(self):
         # Checks every second if the ui needs an update
