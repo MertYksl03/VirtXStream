@@ -128,17 +128,6 @@ class MainWindow(Gtk.ApplicationWindow):
             self.app.show_info_message("Restoring to default is succesful")
 
 
-    # def show_error_dialog(self, message):
-    #     dialog = Gtk.MessageDialog(
-    #         transient_for=self,
-    #         flags=0,
-    #         message_type=Gtk.MessageType.ERROR,
-    #         buttons=Gtk.ButtonsType.OK,
-    #         text=message,
-    #     )
-    #     dialog.run()
-    #     dialog.destroy()
-
     def monitor_ui_needed_update(self):
         # Checks every second if the ui needs an update
         # IDK if this is the best way to do this, but it works

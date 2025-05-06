@@ -1,5 +1,4 @@
 import os
-import sys
 import subprocess
 
 from utils.file_manager import FileManager
@@ -115,10 +114,3 @@ class Dummy:
             except:
                 self.update_status()
                 return False, "Couldn't delete the dummy config"
-
-
-    # FOR DEVELOPMENT
-    def print_variables(self):
-        print("Portname is " + self.port_name)
-        print("Filepathh is " + self.file_path)
-        print("The status is  " + self.check_status())

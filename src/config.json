@@ -15,7 +15,7 @@
     },
     "user-settings": {
         "x": {
-            "file_path": "testfiles/a",
+            "file_path": "testfiles/",
             "default_port": "HDMI-1-0"
         },
         "virtual-display": {
