@@ -7,13 +7,14 @@ class ConfigWindow(Gtk.Window):
     def __init__(self, app, parent, which_config):
         Gtk.Window.__init__(self, title="Configuration Window")
         self.set_resizable(False)
-        self.set_position(Gtk.WindowPosition.CENTER)
+        self.set_position(Gtk.WindowPosition.CENTER_ON_PARENT)
         self.set_border_width(10)
         self.set_transient_for(parent)
         self.set_modal(True)
 
         # Store the referance of app object
         self.app = app
+        self.parent_window = parent
 
         # Initialize dmy_port_name
         self.dmy_port_name = None 
@@ -56,18 +57,7 @@ class ConfigWindow(Gtk.Window):
     def on_close_clicked(self, widget):
         self.destroy()
 
-    def show_error_dialog(self, message):
-        dialog = Gtk.MessageDialog(
-            parent=self,
-            flags=Gtk.DialogFlags.MODAL,
-            type=Gtk.MessageType.ERROR,
-            buttons=Gtk.ButtonsType.OK,
-            message_format=message
-        )
-        dialog.set_title("Error")
-        dialog.run()
-        dialog.destroy()
-
+    
     def create_hidden_radio_box(self):
         # Create a hidden radio button to act as the initial selection
         radio_button = Gtk.RadioButton.new_with_label(None, "Hidden")
@@ -140,11 +130,11 @@ class ConfigWindow(Gtk.Window):
         # First check if the entries are not empty
         if not file_path: 
             # show an error dialog to user
-            self.show_error_dialog("Please enter the filepath")
+            self.parent_window.show_error_message("Please enter the filepath")
             return 
         
         if not port_name:
-            self.show_error_dialog("Please select a port")
+            self.parent_window.show_error_message("Please select a port")
             return
         
         # Add '/' to end of the filepath if the user didnt put it 
@@ -248,12 +238,12 @@ class ConfigWindow(Gtk.Window):
         # Check did user select a resolution
         if not resolution: 
             # show an error dialog to user
-            self.show_error_dialog("Please select a resolution")
+            self.parent_window.show_error_message("Please select a resolution")
             return 
         
         if not position:
             # show an error dialog to user
-            self.show_error_dialog("Please select a position")
+            self.parent_window.show_error_message("Please select a position")
             return     
         
         self.app.on_config_save_vd(resolution, position)
@@ -316,17 +306,17 @@ class ConfigWindow(Gtk.Window):
         # Check if the port is not empty
         if not port: 
             # show an error dialog to user
-            self.show_error_dialog("Please enter the port")
+            self.parent_window.show_error_message("Please enter the port")
             return 
         
         # Check if the port is a number
         if not port.isdigit():
-            self.show_error_dialog("Please enter a valid port number")
+            self.parent_window.show_error_message("Please enter a valid port number")
             return
         # Check if the port is in the valid range
         port = int(port)
         if port < 1024 or port > 65535:
-            self.show_error_dialog("Please enter a port number between 1024 and 65535")
+            self.parent_window.show_error_message("Please enter a port number between 1024 and 65535")
             return
         port = str(port)
 
