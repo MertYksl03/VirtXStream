@@ -24,7 +24,7 @@ class MyApp(Gtk.Application):
     port_name = None                                        # Holds the name of the display port of virtual display
     main_port_name = None                                   # Holds the name of the primary display port 
     resolutions = None                                      # All the resolution of the port that vd is connected to
-    active_resoultion_vnc = None                            # 
+    vnc_resolution = None                                   # The resolution of the vnc server
 
     dummy_instance = None
     virtual_display_instance = None
@@ -110,8 +110,17 @@ class MyApp(Gtk.Application):
         # Create adb server instance
         self.adb_instance = ADBServer()
 
+        try:
+            self.vnc_resolution = self.data["user-settings"]["vnc-server"]["resolution"]
+            self.vnc_is_just_usb = self.data["user-settings"]["vnc-server"]["is_just_usb"]
+            self.vnc_port = self.data["user-settings"]["vnc-server"]["default_port"]
+        except Exception as e:
+            self.show_critical_error(str(e))
+            return
+
         # Create Vnc server instance
-        self.vnc_instance = VNCServer("1368x768+1920+0", True, "5900")
+        self.vnc_instance = VNCServer(self.vnc_resolution, self.vnc_is_just_usb, self.vnc_port)
+        
 
         self.ui_update_needed = False
         
@@ -192,6 +201,24 @@ class MyApp(Gtk.Application):
             self.main_window.show_critical_error("Error: Invalid JSON format.")
             self.data = {}  # Fallback to an empty dictionary
 
+    def set_vnc_resolution(self):
+        # Get current resolution of the vnc server from xrandr
+        result = subprocess.run(['xrandr'], stdout=subprocess.PIPE, text=True)
+        output = result.stdout
+        # Extract the resolution from the output
+        for line in output.splitlines():
+            if self.port_name in line and 'connected' in line:
+                # Extract the resolution from the line
+                resolution = line.split()[2]
+                self.vnc_instance.resolution = resolution
+                self.data["user-settings"]["vnc-server"]["resolution"] = resolution
+                self.save_user_settings()
+                self.ui_update_needed = True
+
+                return True
+        # If the port is not found, return False
+        return False
+        
     def set_xrandr_info(self):
         port_name = self.port_name
         # Run the xrandr command and capture the output
@@ -305,6 +332,10 @@ class MyApp(Gtk.Application):
 
         # Start the virtual display
         status = self.virtual_display_instance.plug_virtual_display(self.main_port_name, self.port_name)
+
+        # Set the resolution of the vnc server
+        self.set_vnc_resolution()
+
         self.ui_update_needed = True
         return status
     
