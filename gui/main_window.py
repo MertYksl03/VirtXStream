@@ -125,7 +125,7 @@ class MainWindow(Gtk.ApplicationWindow):
 
     def on_restore_clicked(self, button):
         if self.app.restore_defaults() == True:
-            self.app.show_info_message("Restoring to default is succesful")
+            self.show_info_message("Restoring to default is succesful")
 
 
     def monitor_ui_needed_update(self):
@@ -138,7 +138,7 @@ class MainWindow(Gtk.ApplicationWindow):
                 if self.box_upper.update() == True and self.box_lower.update() == True:
                     self.app.ui_update_needed = False
                 else:
-                    self.app.show_error_message("Error: Could not update the UI")
+                    self.show_error_message("Error: Could not update the UI")
             else:
                 # If the update is not needed, then do nothing
                 pass

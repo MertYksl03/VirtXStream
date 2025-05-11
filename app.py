@@ -416,10 +416,10 @@ class MyApp(Gtk.Application):
                 self.ui_update_needed = True
             if "viewer exited." in decoded:
                 self.vnc_instance.is_connected = False
+                self.vnc_instance.status = False
+                self.vnc_instance.process = None
                 self.ui_update_needed = True
-            
-            # FOR DEVELOPMENT
-            print(self.vnc_instance.is_connected)
+
 
 
     def save_user_settings(self): # By writing into config.json file 
