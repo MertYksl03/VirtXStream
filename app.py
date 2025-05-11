@@ -57,6 +57,9 @@ class MyApp(Gtk.Application):
         self.add_window(self.main_window)
         self.main_window.show_all()
 
+        # After the window is shown, UI updates are needed
+        self.ui_update_needed = True
+
 
     def initialize_app(self):
         
@@ -72,14 +75,15 @@ class MyApp(Gtk.Application):
         # These variables will be loaded from config.json
         try :
             self.file_path = self.data["user-settings"]["x"]["file_path"]
+            self.nvidia_conf_name = self.data["user-settings"]["x"]["nvidia_conf_name"]
             self.port_name = self.data["user-settings"]["x"]["default_port"]
         except Exception as e:
             self.show_critical_error(str(e))
             return
 
         # Initialize Dummy class
-        self.dummy_instance = Dummy()
-        status = self.dummy_instance.initialize(self.file_path, self.port_name, self.main_port_name)
+        self.dummy_instance = Dummy(self.file_path)
+        status = self.dummy_instance.initialize(self.nvidia_conf_name, self.port_name, self.main_port_name)
         if status[0] == False:
             # Display error message and close the app
             # error_message = "Failed to initialize Dummy class. The application will now close."
@@ -87,10 +91,11 @@ class MyApp(Gtk.Application):
             self.show_critical_error(error_message)
             return  # Stop further execution
         
-        # self.main_port_name = self.dummy_instance.main_port
-
         # fetch the infos from xrandr command and set them
         self.set_xrandr_info()
+
+        # self.main_port_name = self.dummy_instance.main_port
+
 
         # Create the vd instance
         self.virtual_display_instance = VirtualDisplay()
@@ -122,8 +127,6 @@ class MyApp(Gtk.Application):
         self.vnc_instance = VNCServer(self.vnc_resolution, self.vnc_is_just_usb, self.vnc_port)
         
 
-        self.ui_update_needed = False
-        
         # if initialize is succesfull then return true
         return True
     
@@ -277,8 +280,8 @@ class MyApp(Gtk.Application):
             
         return False
 
-    def on_config_saved_dmy(self, file_path, port_name):
-        status = self.dummy_instance.initialize(file_path, port_name, self.main_port_name)
+    def on_config_saved_dmy(self, nvidia_conf_name, port_name):
+        status = self.dummy_instance.initialize(nvidia_conf_name, port_name, self.main_port_name)
         self.ui_update_needed = True
         # Check if the initialization was successful
         if status[0] == False:
@@ -286,7 +289,7 @@ class MyApp(Gtk.Application):
             GLib.idle_add(self.main_window.show_error_message, error_message)
             return False # Return false, so user can enter a valid filepath
         else:
-            self.data["user-settings"]["x"]["file_path"] = file_path
+            self.data["user-settings"]["x"]["nvidia_conf_name"] = nvidia_conf_name
             self.data["user-settings"]["x"]["default_port"] = port_name
 
             # Write the new json file 
@@ -296,6 +299,10 @@ class MyApp(Gtk.Application):
         # Check if the dummy instance is None
         if self.dummy_instance == None:
             return False, "Dummy instance is not initialized"
+        
+        # Check if the dummy is ready 
+        if self.dummy_instance.is_ready == False:
+            return False, "Dummy instance is not ready\nPlease check the file path and port name"
 
         # Activate the dummy config
         status = self.dummy_instance.activate_dummy_config()

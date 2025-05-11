@@ -73,7 +73,7 @@ class ConfigWindow(Gtk.Window):
         grid.set_row_spacing(10)
 
         # Info about file path
-        info_file_path_string = """Enter the file path to your Xorg config files"""
+        info_file_path_string = "Enter the name of the Nvidia config file"
         info_file_path_label = Gtk.Label()
         info_file_path_label.set_label(info_file_path_string)
         grid.attach(info_file_path_label, 0, 0, 2, 1)  # Span across 2 columns
@@ -81,7 +81,7 @@ class ConfigWindow(Gtk.Window):
         # File path entry
         grid.attach(Gtk.Label(label="File Path:"), 0, 1, 1, 1)
         self.file_path_entry = Gtk.Entry()
-        self.file_path_entry.set_placeholder_text("Current file path: " + self.app.dummy_instance.file_path)
+        self.file_path_entry.set_placeholder_text(self.app.dummy_instance.nvidia_conf_file_name)
         grid.attach(self.file_path_entry, 1, 1, 1, 1)
 
         # Info about port name
@@ -124,26 +124,23 @@ class ConfigWindow(Gtk.Window):
 
     def on_save_clicked_dmy(self, widget):
 
-        file_path = self.file_path_entry.get_text().strip()
+        file_name = self.file_path_entry.get_text().strip()
         port_name = self.dmy_port_name
 
         # First check if the entries are not empty
-        if not file_path: 
+        if not file_name: 
             # show an error dialog to user
-            self.parent_window.show_error_message("Please enter the filepath")
+            self.parent_window.show_error_message("Please enter the name of the file")
             return 
         
         if not port_name:
             self.parent_window.show_error_message("Please select a port")
             return
         
-        # Add '/' to end of the filepath if the user didnt put it 
-        if file_path[-1] != "/":
-            file_path = file_path + "/"
 
         # Call the callback funtion with enterd values
         if self.app.on_config_saved_dmy:
-            if self.app.on_config_saved_dmy(file_path, port_name) == True:
+            if self.app.on_config_saved_dmy(file_name, port_name) == True:
                 # Close the configuration window
                 self.destroy()
 

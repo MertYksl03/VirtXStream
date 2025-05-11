@@ -9,27 +9,36 @@ class Dummy:
     port_name = None        # Holds the name of the display port (virtual display)
     main_port = None        # Holds the name of the main display port 
     status = None           # Holds the status (0 = disabled, 1 = enabled, -1 = reboot required(dmy placed r. now), -2 = reboot required(dmy deleted r. now))
+    is_ready = False        # Holds the if the dummy is ready or not
 
-    def __init__(self):
+    def __init__(self, file_path):
         # Private variables
         self.__nvidia_conf = None
         self.__dummy_data = None
-        
+        self.__dmy_conf_name = "10-dummy.conf"
+        self.file_path = file_path
+
+
         self.is_dummy_activated = False
 
-    def initialize(self,file_path, port_name, main_port):
-        self.file_path = file_path
+    def initialize(self, nvidia_conf_file_name ,port_name, main_port):
+        self.nvidia_conf_file_name = nvidia_conf_file_name
         self.port_name = port_name
         self.main_port = main_port
 
+        # Check if the all the parameters are valid
+
         # Read the files 
-        self.__nvidia_conf = FileManager.read_file(file_path + "10-nvidia-drm-outputclass.conf")
+        print("File path: ", self.file_path + self.nvidia_conf_file_name)
+        self.__nvidia_conf = FileManager.read_file(self.file_path + self.nvidia_conf_file_name)
         if self.__nvidia_conf == False:
-            return False, "Couldn't read nvidia config file. \nFile path might be wrong"
+            self.is_ready = False
+            return False, "Couldn't read nvidia config file. \nFile name might be wrong"
         
         dummy_template = FileManager.read_file("dummy_template.txt")
         
         if dummy_template == False:
+            self.is_ready = False
             return False, "Couldn't read dummy_template.txt \nFile path might be wrong" 
 
         # Create the dummy config data
@@ -41,10 +50,11 @@ class Dummy:
         self.update_status()
 
         # If everything is ok then return True, meaning the initialize is succesfull
-        return True, " "
+        self.is_ready = True
+        return True, "Dummy initialized succesfully"
 
     def check_dummy_activated(self):
-        file_path = self.file_path + "10-dummy.conf"
+        file_path = self.file_path + self.__dmy_conf_name
         # Check if the file existed and the content of the file is same as it should be
         if FileManager.is_file_existed(file_path) and FileManager.read_file(file_path) == self.__dummy_data:
             return True
@@ -81,7 +91,6 @@ class Dummy:
     # index 1 is the message 
 
     def activate_dummy_config(self):
-        config_file_name = "10-dummy.conf"
 
         # Dont do a thing if the dummy is already activated
         if self.check_dummy_activated():
@@ -89,7 +98,7 @@ class Dummy:
             return False, "Dummy is already activated"
         
         # Create, write the dummy-config and check its content
-        if FileManager.write_file(self.file_path + config_file_name, self.__dummy_data) == True and self.check_dummy_activated() == True:
+        if FileManager.write_file(self.file_path + self.__dmy_conf_name, self.__dummy_data) == True and self.check_dummy_activated() == True:
             self.update_status()
             return True, "Dummy config activated"
         else:
@@ -99,7 +108,7 @@ class Dummy:
 
     # This function deletes the dummy config
     def deactivate_dummy_config(self):
-        file_path =  self.file_path + "10-dummy.conf"
+        file_path =  self.file_path + self.__dmy_conf_name
 
         # Check if the config is already deleted
         if not FileManager.is_file_existed(file_path):
