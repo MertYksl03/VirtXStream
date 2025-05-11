@@ -413,8 +413,10 @@ class MyApp(Gtk.Application):
             decoded = line.decode()
             if "Got connection from client" in decoded:
                 self.vnc_instance.is_connected = True
+                self.ui_update_needed = True
             if "viewer exited." in decoded:
                 self.vnc_instance.is_connected = False
+                self.ui_update_needed = True
             
             # FOR DEVELOPMENT
             print(self.vnc_instance.is_connected)

@@ -63,8 +63,8 @@ class MainWindow(Gtk.ApplicationWindow):
         box_outer.pack_start(self.box_upper.get_box(), True, True, 0)
 
 
-        self.box_lower = BoxLower().get_box()
-        box_outer.pack_start(self.box_lower, True, True, 0)
+        self.box_lower = BoxLower(self.app, self)
+        box_outer.pack_start(self.box_lower.get_box(), True, True, 0)
 
         # Thread to monitor the UI
         self.monitor_thread = threading.Thread(target=self.monitor_ui_needed_update)
@@ -135,7 +135,7 @@ class MainWindow(Gtk.ApplicationWindow):
         while True:
             if self.app.ui_update_needed == True:
                 # If the update is sucessful, then the app does not need an ui update
-                if self.box_upper.update() == True: #and self.box_lower.update() == True:
+                if self.box_upper.update() == True and self.box_lower.update() == True:
                     self.app.ui_update_needed = False
                 else:
                     self.app.show_error_message("Error: Could not update the UI")
