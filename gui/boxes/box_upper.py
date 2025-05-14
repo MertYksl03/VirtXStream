@@ -21,6 +21,7 @@ class BoxUpper:
 
         # The status that currently showen in the app(in the ui)
         self.status_dummy = self.dummy_instance.status
+        self.is_dummy_ready = self.dummy_instance.is_ready
         self.status_vd = self.vd_instance.status
         self.status_adb = self.adb_instance.status
         self.status_vnc = self.vnc_instance.status
@@ -45,7 +46,7 @@ class BoxUpper:
         self.box_upper.pack_start(vnc_box, True, True, 10)
 
         # Update the boxes
-        self.update_config_box(self.status_dummy)
+        self.update_config_box(self.status_dummy, self.is_dummy_ready)
         self.update_display_box(self.status_vd)
         self.update_adb_settings_box(self.status_adb)
         self.update_vnc_box(self.status_vnc)
@@ -58,14 +59,16 @@ class BoxUpper:
     def update(self):
         # Get the new status of the instances
         new_status_dummy = self.dummy_instance.status
+        new_is_dummy_ready = self.dummy_instance.is_ready
         new_status_vd = self.vd_instance.status
         new_status_adb = self.adb_instance.status
         new_status_vnc = self.vnc_instance.status
 
         # Check which box need an ui update
-        if self.status_dummy != new_status_dummy:
-            self.update_config_box(new_status_dummy)
+        if (self.status_dummy != new_status_dummy) or (self.is_dummy_ready != new_is_dummy_ready):
+            self.update_config_box(new_status_dummy, new_is_dummy_ready)
             self.status_dummy = new_status_dummy
+            self.is_dummy_ready = new_is_dummy_ready
         
         if self.status_vd != new_status_vd:
             self.update_display_box(new_status_vd)
@@ -138,10 +141,13 @@ class BoxUpper:
         self.show_status_message(status)
 
     # This function updates the ui elements of config box 
-    def update_config_box(self, new_status):
-
-        #TODO: Display the status message according to status from dummy instance
-
+    def update_config_box(self, new_status, new_is_dummy_ready):
+        if new_is_dummy_ready == False:
+            status_message = "Dummy config is not ready\nPlease configure it\n"
+            # Update status label
+            GLib.idle_add(self.label_status_dmy.set_text, status_message)  
+            return 
+        
         if new_status == 1:
             status_message = "Activated"
         elif new_status == -1 or new_status == -2:

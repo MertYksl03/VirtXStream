@@ -3,7 +3,7 @@
         "x": {
             "file_path": "/usr/share/X11/xorg.conf.d/",
             "default_port": "HDMI-1-0",
-            "nvidia_conf_name": "10-nvidia.conf"
+            "nvidia_conf_name": "10-nvidia-drm-outputclass.conf"
         },
         "virtual-display": {
             "resolution": "1280x800",
@@ -17,17 +17,17 @@
     },
     "user-settings": {
         "x": {
-            "file_path": "testfiles/",
+            "file_path": "/usr/share/X11/xorg.conf.d/",
             "default_port": "HDMI-1-0",
             "nvidia_conf_name": "10-nvidia-drm-outputclass.conf"
         },
         "virtual-display": {
-            "resolution": "1600x900",
+            "resolution": "1280x800",
             "position": "right-of"
         },
         "vnc-server": {
-            "resolution": "(normal",
-            "is_just_usb": false,
+            "resolution": "1280x800+1920+0",
+            "is_just_usb": true,
             "default_port": "5900"
         }
     }

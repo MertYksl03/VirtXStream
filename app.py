@@ -93,13 +93,8 @@ class MyApp(Gtk.Application):
 
         # Initialize Dummy class
         self.dummy_instance = Dummy(self.file_path)
-        status = self.dummy_instance.initialize(self.nvidia_conf_name, self.port_name, self.main_port_name)
-        if status[0] == False:
-            # Display error message and close the app
-            # error_message = "Failed to initialize Dummy class. The application will now close."
-            error_message = status[1]
-            self.show_critical_error(error_message)
-            return  # Stop further execution
+        self.dummy_instance.initialize(self.nvidia_conf_name, self.port_name, self.main_port_name)
+        
         
         # fetch the infos from xrandr command and set them
         self.set_xrandr_info()
@@ -313,6 +308,7 @@ class MyApp(Gtk.Application):
         # Check if the dummy is ready 
         if self.dummy_instance.is_ready == False:
             return False, "Dummy instance is not ready\nPlease check the file path and port name"
+        
 
         # Activate the dummy config
         status = self.dummy_instance.activate_dummy_config()
@@ -323,6 +319,10 @@ class MyApp(Gtk.Application):
         # Check if the dummy instance is None
         if self.dummy_instance == None:
             return False, "Dummy instance is not initialized"
+        
+        # Check if the dummy is ready 
+        if self.dummy_instance.is_ready == False:
+            return False, "Dummy instance is not ready\nPlease check the file path and port name"
 
 
         # Deactivate the dummy config
