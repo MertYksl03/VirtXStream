@@ -25,18 +25,31 @@ class BoxUpper:
         self.status_adb = self.adb_instance.status
         self.status_vnc = self.vnc_instance.status
         
-        # Create and add sub-boxes
-        self.box_upper.pack_start(self.create_config_box(), True, True, 10)
-        self.box_upper.pack_start(self.create_display_settings_box(), True, True, 10)
-        self.box_upper.pack_start(self.create_adb_settings_box(), True, True, 10)
-        self.box_upper.pack_start(self.create_vnc_box(), True, True, 10)
+        # Create sub-boxes
+        config_box = self.create_config_box()
+        display_box = self.create_display_settings_box()
+        adb_box = self.create_adb_settings_box()
+        vnc_box = self.create_vnc_box()
 
+        # Set the name of the boxes for CSS
+        config_box.set_name("upper_box_boxes")
+        display_box.set_name("upper_box_boxes")
+        adb_box.set_name("upper_box_boxes")
+        vnc_box.set_name("upper_box_boxes")
+
+
+        # Create and add sub-boxes
+        self.box_upper.pack_start(config_box, True, True, 10)
+        self.box_upper.pack_start(display_box, True, True, 10)
+        self.box_upper.pack_start(adb_box, True, True, 10)
+        self.box_upper.pack_start(vnc_box, True, True, 10)
 
         # Update the boxes
         self.update_config_box(self.status_dummy)
         self.update_display_box(self.status_vd)
         self.update_adb_settings_box(self.status_adb)
         self.update_vnc_box(self.status_vnc)
+        
 
     def get_box(self):
         return self.box_upper
@@ -221,9 +234,10 @@ class BoxUpper:
         self.label_status_adb = Gtk.Label()
         box.pack_start(self.label_status_adb, True, True, 10)
         
-        # I think, i don't need configure button for adb
-        # button_configure = Gtk.Button(label="Configure")
-        # box.pack_start(button_configure, False, False, 10)
+        # A empty label to make the ui more beautiful
+        empty_label = Gtk.Label(" ")
+        box.pack_start(empty_label, False, False, 10)
+        
         
         self.button_toggle_adb = Gtk.Button()
         self.button_toggle_adb.connect("clicked", self.on_toggle_clicked_adb)

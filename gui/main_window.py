@@ -26,21 +26,12 @@ class MainWindow(Gtk.ApplicationWindow):
         self.set_name("main-window") # name for css
         self.app = app
 
-        # Load external CSS
-        provider = Gtk.CssProvider()
-        provider.load_from_path("styles/style.css")  # Load the CSS file
-
-        Gtk.StyleContext.add_provider_for_screen(
-            Gdk.Screen.get_default(),
-            provider,
-            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
-        )
-
         # Create a Header Bar 
         header_bar = Gtk.HeaderBar()
         header_bar.set_show_close_button(True)
         header_bar.set_title("X-Vnc")
         self.set_titlebar(header_bar)
+        header_bar.set_name("header-bar") # name for css
 
         # A button to restrore the default settings 
         button_restore = Gtk.Button(label="Restore Defaults")
@@ -59,12 +50,16 @@ class MainWindow(Gtk.ApplicationWindow):
         self.add(box_outer)
 
 
-        self.box_upper = BoxUpper(self.app, self)
-        box_outer.pack_start(self.box_upper.get_box(), True, True, 0)
+        self.box_upper_object = BoxUpper(self.app, self)
+        self.box_upper = self.box_upper_object.get_box()
+        self.box_upper.set_name("box-upper") # name for css
+        box_outer.pack_start(self.box_upper, True, True, 0)
 
 
-        self.box_lower = BoxLower(self.app, self)
-        box_outer.pack_start(self.box_lower.get_box(), True, True, 0)
+        self.box_lower_object = BoxLower(self.app, self)
+        self.box_lower = self.box_lower_object.get_box()
+        self.box_upper.set_name("box-lower") # name for css
+        box_outer.pack_start(self.box_lower, True, True, 0)
 
         # Thread to monitor the UI
         self.monitor_thread = threading.Thread(target=self.monitor_ui_needed_update)
@@ -135,7 +130,7 @@ class MainWindow(Gtk.ApplicationWindow):
         while True:
             if self.app.ui_update_needed == True:
                 # If the update is sucessful, then the app does not need an ui update
-                if self.box_upper.update() == True and self.box_lower.update() == True:
+                if self.box_upper_object.update() == True and self.box_lower_object.update() == True:
                     self.app.ui_update_needed = False
                 else:
                     self.show_error_message("Error: Could not update the UI")

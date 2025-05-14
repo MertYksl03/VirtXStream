@@ -11,6 +11,7 @@ class ConfigWindow(Gtk.Window):
         self.set_border_width(10)
         self.set_transient_for(parent)
         self.set_modal(True)
+        self.set_name("config-window") # name for css
 
         # Store the referance of app object
         self.app = app
@@ -30,6 +31,7 @@ class ConfigWindow(Gtk.Window):
         header_bar = Gtk.HeaderBar()
         header_bar.set_show_close_button(False)  # Hide the close button
         self.set_titlebar(header_bar)  # Set the header bar as the window's title bar
+        header_bar.set_name("header-bar") # name for css
 
 
 
@@ -79,7 +81,7 @@ class ConfigWindow(Gtk.Window):
         grid.attach(info_file_path_label, 0, 0, 2, 1)  # Span across 2 columns
 
         # File path entry
-        grid.attach(Gtk.Label(label="File Path:"), 0, 1, 1, 1)
+        grid.attach(Gtk.Label(label="File Name:"), 0, 1, 1, 1)
         self.file_path_entry = Gtk.Entry()
         self.file_path_entry.set_placeholder_text(self.app.dummy_instance.nvidia_conf_file_name)
         grid.attach(self.file_path_entry, 1, 1, 1, 1)
