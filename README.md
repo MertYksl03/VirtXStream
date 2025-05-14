@@ -30,8 +30,6 @@ Optional: adb for USB streaming
 ## How to use
 ### Clone the repo
 ```bash
-Copy
-Edit
 # Clone the repo
 git clone https://github.com/MertYksl03/X-Vnc-Gui.git
 cd X-Vnc-Gui
