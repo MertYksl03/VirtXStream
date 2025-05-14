@@ -27,7 +27,7 @@ Create headless virtual displays for rendering or testing.
 
 Optional: adb for USB streaming
 
-Getting Started
+## Getting Started
 ```bash
 Copy
 Edit
