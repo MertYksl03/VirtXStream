@@ -63,6 +63,7 @@ class BoxLower:
 
             
             self.label_status = Gtk.Label()
+            self.label_status.set_name("label-status") # name for css
 
             box_main.pack_start(self.label_status, True, True, 0)
 

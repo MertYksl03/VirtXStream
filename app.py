@@ -4,7 +4,7 @@ import signal
 import sys
 
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk, GLib  # type: ignore
+from gi.repository import Gtk, GLib, Gdk # type: ignore
 
 from gui.main_window import MainWindow
 
@@ -46,6 +46,15 @@ class MyApp(Gtk.Application):
         if self.initialize_app() == False:
             return
         
+        # Load external CSS
+        provider = Gtk.CssProvider()
+        provider.load_from_path("styles/style.css")  # Load the CSS file
+
+        Gtk.StyleContext.add_provider_for_screen(
+            Gdk.Screen.get_default(),
+            provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        )
         # Register cleanup function for normal exit
         atexit.register(self.clean_up)
 
@@ -59,6 +68,7 @@ class MyApp(Gtk.Application):
 
         # After the window is shown, UI updates are needed
         self.ui_update_needed = True
+
 
 
     def initialize_app(self):

@@ -1,34 +1,31 @@
-#main-window {
-    background-color: rgb(162, 178, 193);
-    color: white;
+#main-window, #config-window{
+    background:  #00001F;
+    color: #bfbfc7;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 20px;
+    padding: 20px;
+    /* border-radius: 10px; */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
 
-#upper_box_boxes {
-    border-radius: 30px;
-    /* background-color: lightskyblue; */
-    /* background-color: rgb(43, 52, 71); */
-    background-color: rgb(38, 43, 54);
+button {
+    background:#7220D4;
+    color : #bfbfc7;
+    border: none;
+    border-radius: 25px;
+    transition: background-color 0.3s ease;
 }
 
-#button-enable {
-    background-color: green;
-    color: white;
+#header-bar {
+    background: black;
 }
 
-#button-disable {
-    background-color: red;
-    color: black;
+#label-status{
+    font-size: 50px;
+    font-weight: bold;
+    background: white;
+    min-height: 300px;
+    min-width: 300px;
 }
 
-#upper_box_boxes button {
-    min-height: 40px;
-    border-radius: 40px;
-}
-
-
-#lower_box_status{
-    font-size: 500%;
-    /* color: greenyellow; */
-    color: red;
-}

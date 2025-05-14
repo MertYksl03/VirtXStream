@@ -29,13 +29,12 @@ class Dummy:
         # Check if the all the parameters are valid
 
         # Read the files 
-        print("File path: ", self.file_path + self.nvidia_conf_file_name)
         self.__nvidia_conf = FileManager.read_file(self.file_path + self.nvidia_conf_file_name)
         if self.__nvidia_conf == False:
             self.is_ready = False
             return False, "Couldn't read nvidia config file. \nFile name might be wrong"
         
-        dummy_template = FileManager.read_file("dummy_template.txt")
+        dummy_template = FileManager.read_file("src/dummy_template.txt")
         
         if dummy_template == False:
             self.is_ready = False
