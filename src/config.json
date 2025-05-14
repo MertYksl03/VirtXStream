@@ -23,10 +23,10 @@
         },
         "virtual-display": {
             "resolution": "1280x800",
-            "position": "right-of"
+            "position": "left-of"
         },
         "vnc-server": {
-            "resolution": "1280x800+1920+0",
+            "resolution": "1280x800+0+0",
             "is_just_usb": true,
             "default_port": "5900"
         }
