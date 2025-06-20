@@ -1,5 +1,5 @@
-# X-Vnc-Gui
-X-Vnc-Gui is a tool that creates a virtual display on the X server using an NVIDIA GPU and streams it to a tablet (or any external device) over a VNC server. It provides a simple way to use a tablet as a second screen — either wirelessly or over USB — with configurable display parameters.
+# VirtXStream 
+VirtXStream is a tool that creates a virtual display on the X server using an NVIDIA GPU and streams it to a tablet (or any external device) over a VNC server. It provides a simple way to use a tablet as a second screen — either wirelessly or over USB — with configurable display parameters.
 
 ## Features
 🖥️ Create virtual X display powered by NVIDIA GPUs using xrandr and xorg.conf.
@@ -31,8 +31,8 @@ Optional: adb for USB streaming
 ### Clone the repo
 ```bash
 # Clone the repo
-git clone https://github.com/MertYksl03/X-Vnc-Gui.git
-cd X-Vnc-Gui
+git clone https://github.com/MertYksl03/VirtXStream.git
+cd VirtXStream
 ```
 ### Run the program
 ```bash
